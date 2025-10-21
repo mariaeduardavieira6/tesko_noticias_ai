@@ -1,4 +1,4 @@
-"use client"
+"use client" // Precisa ser client side!
 
 import type { ComponentProps } from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"

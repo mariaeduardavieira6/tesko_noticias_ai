@@ -1,17 +1,18 @@
 // src/components/navbar.tsx
-import { ThemeToggle } from "./theme-toggle"
-import { Input } from "@/components/ui/input" // este pode continuar com @
-
+import { ThemeToggle } from "./theme-toggle" // Assumindo que o toggle está no mesmo diretório
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3">
-        <div className="text-xl font-semibold">Tesko Notícias AI</div>
-        <div className="ml-auto flex items-center gap-3">
-          <Input placeholder="Buscar..." className="w-64" />
-          <ThemeToggle />
-        </div>
+    // A Navbar deve usar as classes de tema para mudar de cor
+    <header className="sticky top-0 z-40 w-full border-b bg-background/90 backdrop-blur">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Título da Aplicação */}
+        <h1 className="text-xl font-bold text-foreground">
+          Tesko Notícias AI
+        </h1>
+        
+        {/* Componente de Troca de Tema */}
+        <ThemeToggle />
       </div>
     </header>
   )
