@@ -1,0 +1,36 @@
+# Ambiente virtual
+.venv/
+venv/
+
+# Arquivos de configuração locais
+.env
+*.env
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# IDEs e editores
+.vscode/
+.idea/
+
+# Docker volumes (se forem criados)
+postgres_data/
+*.pid
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos temporários
+*.tmp
+*.bak
+*.swp
