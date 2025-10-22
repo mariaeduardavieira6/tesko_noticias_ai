@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .db import Base, engine
+from .database import Base, engine
 from .routers import articles, categories, companies
 
 # cria tabelas (caso não existam)
@@ -21,7 +21,7 @@ app.add_middleware(
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok"}
+    return {"ok": "true"}
 
 # inclui rotas
 app.include_router(articles.router)

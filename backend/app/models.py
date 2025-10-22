@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from .db import Base
+from .database import Base
 
 # Tabelas de relação N:N
 article_categories = Table(
