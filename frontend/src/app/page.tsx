@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link"; // ✅ importa o Link
 import { Navbar } from "@/components/navbar";
 import { useArticles } from "@/hooks/usearticles";
 import ArticleCard from "@/components/ArticleCard";
@@ -48,7 +49,15 @@ export default function Home() {
 
         {/* Grid de cards (Pinterest-like responsivo) */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {data?.map((a) => <ArticleCard key={a.id} a={a} />)}
+          {data?.map((a) => (
+            <Link
+              key={a.id}
+              href={`/articles/${a.id}`}      // ✅ rota dinâmica para a página de detalhe
+              className="block focus:outline-none focus:ring-2 focus:ring-white/20 rounded-xl"
+            >
+              <ArticleCard a={a} />           {/* ✅ card inteiro fica clicável */}
+            </Link>
+          ))}
         </div>
 
         {/* Paginação simples */}
@@ -75,4 +84,3 @@ export default function Home() {
     </div>
   );
 }
-
