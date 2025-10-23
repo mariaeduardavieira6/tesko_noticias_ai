@@ -82,3 +82,25 @@ def list_articles(
         .limit(limit)
         .all()
     )
+# ----------------------------------------------------------------------
+# /api/articles/{id} -> detalhe do artigo (com mídia)
+# ----------------------------------------------------------------------
+from fastapi import HTTPException
+
+@router.get("/{article_id}", response_model=schemas.ArticleDetailOut)
+def get_article(
+    article_id: int,
+    db: Session = Depends(get_db),
+):
+    article = (
+        db.query(models.Article)
+        .options(
+            selectinload(models.Article.categories),
+            selectinload(models.Article.companies),
+        )
+        .filter(models.Article.id == article_id)
+        .first()
+    )
+    if not article:
+        raise HTTPException(status_code=404, detail="Artigo não encontrado")
+    return article
