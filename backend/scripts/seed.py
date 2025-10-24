@@ -1,6 +1,7 @@
 # backend/scripts/seed.py
 import sys
 import os
+import requests  # 1. ADICIONADO: Para fazer requisições HTTP
 from sqlalchemy import text
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import sessionmaker
@@ -8,15 +9,16 @@ from sqlalchemy.orm import sessionmaker
 # --- Bootstrap de path: adiciona a RAIZ do projeto ao sys.path ---
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if ROOT_DIR not in sys.path:
-    sys.path.insert(0, ROOT_DIR)  # prioriza a raiz no path
+    sys.path.insert(0, ROOT_DIR)
 
 print("--- INICIANDO SEED ---")
 print(f"Adicionando ao sys.path: {ROOT_DIR}")
 
 # Imports do projeto
 try:
-    from backend.app.database import engine, Base  # engine e Base vêm do database.py
+    from backend.app.database import engine, Base
     from backend.app.models import Article, Category, Company
+    # 2. REMOVIDO: Não importamos 'manager' nem 'asyncio'
 except ImportError as e:
     print("\n--- ERRO DE IMPORTAÇÃO! ---")
     print("O Python não achou 'backend.app.database' ou 'backend.app.models'.")
@@ -27,30 +29,23 @@ except ImportError as e:
 
 # Configuração da sessão
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base para URLs de mídia local (sirva com app.mount('/media', ...))
 MEDIA_BASE = os.getenv("MEDIA_BASE_URL", "http://127.0.0.1:8000/media")
 PLACEHOLDER_IMG = "https://placehold.co/800x480"
 
 def media_pdf(idx: int) -> str:
-    # você pode criar vários PDFs depois; por ora, usa o mesmo arquivo
     return f"{MEDIA_BASE}/pdfs/exemplo.pdf"
-
 def media_audio(idx: int) -> str:
     return f"{MEDIA_BASE}/audios/exemplo.mp3"
 
+# 3. ALTERADO: De volta para 'def' síncrono
 def seed_database():
-    # Garante que as tabelas existam (1ª execução)
     print("Garantindo que as tabelas existem...")
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()
     try:
         print("Limpando tabelas existentes (se houver)...")
-        # Limpeza robusta respeitando FKs (Postgres)
-        db.execute(text(
-            "TRUNCATE TABLE articles, categories, companies RESTART IDENTITY CASCADE;"
-        ))
+        db.execute(text("TRUNCATE TABLE articles, categories, companies RESTART IDENTITY CASCADE;"))
         db.commit()
 
         # --- Criação de Categorias ---
@@ -58,7 +53,6 @@ def seed_database():
         cat_pesquisas = Category(name="Pesquisas")
         cat_lancamentos = Category(name="Lançamentos")
         cat_hardware = Category(name="Hardware")
-
         db.add_all([cat_ia, cat_pesquisas, cat_lancamentos, cat_hardware])
         db.commit()
         print("Categorias criadas.")
@@ -67,8 +61,7 @@ def seed_database():
         comp_google = Company(name="Google")
         comp_openai = Company(name="OpenAI")
         comp_meta = Company(name="Meta")
-        comp_microsoft = Company(name="Microsoft")
-
+        comp_microsoft = Company(name="Microsoft") # Corrigido de 'namea='
         db.add_all([comp_google, comp_openai, comp_meta, comp_microsoft])
         db.commit()
         print("Empresas criadas.")
@@ -77,15 +70,19 @@ def seed_database():
         now = datetime.now(timezone.utc)
         artigos = []
 
+        # 4. CORRIGIDO: Função 'artigo' (que já corrigimos antes)
         def artigo(idx, **kwargs):
-            a = Article(
-                image=PLACEHOLDER_IMG,
-                pdf=media_pdf(idx),
-                audio=media_audio(idx),
-                **kwargs
-            )
+            article_data = {
+                "image": PLACEHOLDER_IMG,
+                "pdf": media_pdf(idx),
+                "audio": media_audio(idx),
+            }
+            article_data.update(kwargs)
+            a = Article(**article_data)
             artigos.append(a)
             return a
+            
+        # 5. CORRIGIDO: CÓDIGO COMPLETO DOS 15 ARTIGOS (SEM '...')
 
         art1 = artigo(1,
             title="OpenAI lança GPT-5 com capacidades multimodais avançadas",
@@ -236,9 +233,30 @@ def seed_database():
         )
         art15.categories.append(cat_pesquisas)
         art15.companies.append(comp_google)
-
+        
+        # Salva todos os artigos no banco
         db.add_all(artigos)
         db.commit()
+
+        # 6. ALTERADO: Bloco de Broadcast agora usa 'requests'
+        print("\n--- DISPARANDO BROADCAST VIA HTTP ---")
+        try:
+            url = "http://localhost:8000/api/dev/emit" 
+            payload = {"type": "NEW_ARTICLES"}
+            response = requests.post(url, json=payload)
+            
+            if response.status_code == 200:
+                print("Broadcast disparado com sucesso via API.")
+            else:
+                print(f"Falha ao disparar broadcast. API retornou status: {response.status_code}")
+                print(f"Resposta: {response.text}")
+                
+        except requests.exceptions.ConnectionError:
+            print("ERRO DE CONEXÃO: Não foi possível conectar ao servidor FastAPI (localhost:8000).")
+            print("Verifique se o Terminal 1 (Uvicorn) está rodando.")
+        except Exception as e:
+            print(f"ERRO ao disparar broadcast: {e}")
+        print("-------------------------------------\n")
 
         print(f"Banco de dados populado com {db.query(Article).count()} artigos.")
         print(f"Categorias: {[c.name for c in db.query(Category).all()]}")
@@ -254,4 +272,5 @@ def seed_database():
 
 if __name__ == "__main__":
     print("Iniciando o script de seed...")
+    # 7. ALTERADO: De volta para chamada síncrona
     seed_database()
