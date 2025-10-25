@@ -1,15 +1,18 @@
-export type CategoryOut = { id: number; name: string };
-export type CompanyOut  = { id: number; name: string };
+// src/types/article.ts
+export interface Category { id: number; name: string }
+export interface Company  { id: number; name: string }
 
-export type ArticleOut = {
+export interface ArticleOut {
   id: number;
   title: string;
-  summary: string;
-  url: string | null;     // opcional
-  image: string | null;   // URL da imagem de capa
-  pdf: string | null;     // URL do PDF
-  audio: string | null;   // URL do áudio
-  published_at: string;   // ISO datetime
-  categories: CategoryOut[];
-  companies:  CompanyOut[];
-};
+  summary?: string;
+  content?: string;
+  url?: string;
+  image?: string;      // ou image_url (o componente trata os dois)
+  image_url?: string;  // compatibilidade
+  pdf?: string;
+  audio?: string;
+  published_at: string;
+  categories?: Category[];
+  companies?: Company[];
+}

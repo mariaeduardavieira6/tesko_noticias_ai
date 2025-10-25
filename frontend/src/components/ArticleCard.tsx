@@ -1,36 +1,64 @@
-// src/components/ArticleCard.tsx
+// frontend/src/components/ArticleCard.tsx
+import { memo } from "react";
+import Link from "next/link";
+import type { Article } from "@/hooks/useArticles";
 
-// 1. Importamos 'memo' e 'Link'
-import { memo } from "react"; 
-import Link from "next/link"; // 1. ADICIONADO: Importa o Link
-import { Article } from "@/hooks/useArticles";
+type Props = { article: Article };
 
-const ArticleCardComponent = ({ article }: { article: Article }) => {
+const ArticleCardComponent = ({ article }: Props) => {
+  const pubISO =
+    typeof article.published_at === "string"
+      ? article.published_at
+      : new Date(article.published_at).toISOString();
+
   return (
-    <div className="rounded-2xl border p-4 shadow-sm hover:shadow-md transition">
-      
-      {/* 2. ADICIONADO: O Link agora envolve o título */}
-      <Link href={`/articles/${article.id}`}>
-        <h3 className="font-semibold text-lg hover:underline cursor-pointer">
+    <article
+      className="rounded-2xl border p-4 shadow-sm hover:shadow-md transition"
+      aria-labelledby={`art-${article.id}-title`}
+    >
+      {/* Título → navega para a página de detalhes */}
+      <Link
+        href={`/articles/${article.id}`}
+        aria-label={`Abrir detalhes da notícia: ${article.title}`}
+      >
+        <h3
+          id={`art-${article.id}-title`}
+          className="font-semibold text-lg hover:underline cursor-pointer"
+        >
           {article.title}
         </h3>
       </Link>
-      
-      <p className="text-sm text-muted-foreground mt-2">{article.summary}</p>
 
-      <div className="flex flex-wrap gap-2 mt-3">{/* ... Categorias ... */}</div>
-      <div className="flex flex-wrap gap-2 mt-2">{/* ... Empresas ... */}</div>
+      {/* Resumo */}
+      {article.summary && (
+        <p className="text-sm text-muted-foreground mt-2">{article.summary}</p>
+      )}
 
+      {/* (Opcional) Categorias / Empresas */}
+      <div className="flex flex-wrap gap-2 mt-3">{/* chips de categorias */}</div>
+      <div className="flex flex-wrap gap-2 mt-2">{/* chips de empresas */}</div>
+
+      {/* Data de publicação semântica */}
       <div className="text-xs mt-3 opacity-70">
-        {new Date(article.published_at).toLocaleString()}
+        <time dateTime={pubISO}>
+          {new Date(pubISO).toLocaleString()}
+        </time>
       </div>
 
-      {/* 3. Este link '<a>' agora é válido */}
-      <a href={article.url} target="_blank" className="text-sm mt-3 inline-block underline">
-        Ver fonte
-      </a>
-    </div>
+      {/* Link externo para a fonte */}
+      {article.url && (
+        <a
+          href={article.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-sm mt-3 inline-block underline"
+          aria-label="Abrir fonte original em nova aba"
+        >
+          Ver fonte
+        </a>
+      )}
+    </article>
   );
-}
+};
 
 export default memo(ArticleCardComponent);
