@@ -1,160 +1,174 @@
 import { useEffect, useRef } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type QueryFunctionContext, keepPreviousData } from "@tanstack/react-query";
+
 
 // ——— Tipos ———
 export type Category = { id: number; name: string };
-export type Company = { id: number; name: string };
+export type Company  = { id: number; name: string };
 
 export type Article = {
-  id: number;
-  title: string;
-  summary: string;
-  url: string;
-  // Normalizamos imagem para sempre existir em "image"
-  image?: string;
-  // campos brutos vindos do back (alguns seeds usam image, outros image_url)
-  image_url?: string;
-  published_at: string;
-  categories: Category[];
-  companies: Company[];
+  id: number;
+  title: string;
+  summary: string;
+  url: string;
+  // Normalizamos imagem para sempre existir em "image"
+  image?: string;
+  // campos brutos vindos do back (alguns seeds usam image, outros image_url)
+  image_url?: string;
+  published_at: string;
+  categories: Category[];
+  companies: Company[];
 };
 
-type ListParams = {
-  q?: string;
-  category?: string[];
-  company?: string[];
-  limit?: number;
-  offset?: number;
+export type ListParams = {
+  q?: string;
+  category?: string[] | string;
+  company?: string[] | string;
+  limit?: number;
+  offset?: number;
 };
 
 // ——— Utils ———
-const API_BASE =
-  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
 
 // monta URL com query-params (suporta arrays)
-function buildUrl(path: string, params?: Record<string, any>) {
-  const url = new URL(path, API_BASE);
-  if (params) {
-    Object.entries(params).forEach(([k, v]) => {
-      if (Array.isArray(v)) v.forEach(val => url.searchParams.append(k, String(val)));
-      else if (v !== undefined && v !== null && v !== "") url.searchParams.set(k, String(v));
-    });
-  }
-  return url.toString();
+function buildUrl(path: string, params?: Record<string, unknown>) {
+  const url = new URL(path, API_BASE);
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (Array.isArray(v)) {
+        v.forEach((val) => url.searchParams.append(k, String(val)));
+      } else if (v !== undefined && v !== null && v !== "") {
+        url.searchParams.set(k, String(v));
+      }
+    });
+  }
+  return url.toString();
 }
 
 // ——— Hooks ———
 
 // Lista de artigos com paginação correta (usa x-total-count)
 export function useArticles(params: ListParams) {
-  return useQuery({
-    queryKey: ["articles", params],
-    queryFn: async () => {
-      const url = buildUrl("/api/articles", params);
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("Erro ao buscar artigos");
-      const raw: (Article & { image?: string; image_url?: string })[] = await res.json();
+  return useQuery({
+    queryKey: ["articles", params],
+    // ✅ usa o signal do React Query para cancelar fetchs antigos
+    queryFn: async ({ signal }: QueryFunctionContext) => {
+      const url = buildUrl("/api/articles", params);
+      const res = await fetch(url, { cache: "no-store", signal });
+      if (!res.ok) throw new Error("Erro ao buscar artigos");
 
-      // Normaliza imagem para sempre usar "image"
-      const items: Article[] = raw.map((a) => ({
-        ...a,
-        image: a.image ?? a.image_url ?? undefined,
-      }));
+      const raw: (Article & { image?: string; image_url?: string })[] = await res.json();
 
-      const total = Number(res.headers.get("x-total-count") ?? items.length);
-      return { items, total };
-    },
-    refetchInterval: 10_000,        // polling
-    refetchOnWindowFocus: true,
-    staleTime: 5_000,
-  });
+      // Normaliza imagem para sempre usar "image"
+      const items: Article[] = raw.map((a) => ({
+        ...a,
+        image: a.image ?? a.image_url ?? undefined,
+      }));
+
+      const total = Number(res.headers.get("x-total-count") ?? items.length);
+      return { items, total };
+    },
+    // ⚙️ PERFORMANCE
+    placeholderData: keepPreviousData, // <— substitui keepPreviousData: true (evita flicker ao trocar params)
+    refetchOnWindowFocus: false,  // não revalida ao focar a aba
+    refetchOnReconnect: false,    // não revalida ao reconectar
+    retry: 1,                     // evita loop de retries
+    staleTime: 15_000,            // dados “frescos” por 15s
+    gcTime: 5 * 60_000,           // mantém no cache por 5 min
+    refetchInterval: 10_000,      // polling leve (10s)
+  });
 }
 
 // Categorias
 export function useCategories() {
-  return useQuery({
-    queryKey: ["categories"],
-    queryFn: async () => {
-      const res = await fetch(buildUrl("/api/categories"), { cache: "no-store" });
-      if (!res.ok) throw new Error("Erro ao buscar categorias");
-      const data: Category[] = await res.json();
-      return data;
-    },
-    staleTime: 60_000,
-  });
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: async ({ signal }) => {
+      const res = await fetch(buildUrl("/api/categories"), { cache: "no-store", signal });
+      if (!res.ok) throw new Error("Erro ao buscar categorias");
+      const data: Category[] = await res.json();
+      return data;
+    },
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+  });
 }
 
 // Empresas
 export function useCompanies() {
-  return useQuery({
-    queryKey: ["companies"],
-    queryFn: async () => {
-      const res = await fetch(buildUrl("/api/companies"), { cache: "no-store" });
-      if (!res.ok) throw new Error("Erro ao buscar empresas");
-      const data: Company[] = await res.json();
-      return data;
-    },
-    staleTime: 60_000,
-  });
+  return useQuery({
+    queryKey: ["companies"],
+    queryFn: async ({ signal }) => {
+      const res = await fetch(buildUrl("/api/companies"), { cache: "no-store", signal });
+      if (!res.ok) throw new Error("Erro ao buscar empresas");
+      const data: Company[] = await res.json();
+      return data;
+    },
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+  });
 }
 
 /**
- * Tempo real via WebSocket com fallback por variável de ambiente.
- * Em produção, defina NEXT_PUBLIC_WS_URL (ex.: wss://seu-backend.onrailway.app/api/ws)
- */
+ * Tempo real via WebSocket com fallback por variável de ambiente.
+ * Em produção, defina NEXT_PUBLIC_WS_URL (ex.: wss://seu-backend.onrailway.app/api/ws)
+ */
 export function useArticlesRealtime(enabled = true) {
-  const queryClient = useQueryClient();
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<number | null>(null);
+  const queryClient = useQueryClient();
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimer = useRef<number | null>(null);
 
-  useEffect(() => {
-    if (!enabled || typeof window === "undefined") return;
+  useEffect(() => {
+    if (!enabled || typeof window === "undefined") return;
 
-    let stopped = false;
+    let stopped = false;
 
-    const connect = () => {
-      if (stopped) return;
+    const connect = () => {
+      if (stopped) return;
 
-      const wsUrl =
-        process.env.NEXT_PUBLIC_WS_URL ??
-        `${location.protocol === "https:" ? "wss://" : "ws://"}${location.hostname}:8000/api/ws`;
+      // ✅ CORRIGIDO: string template com crases
+      const wsUrl =
+        process.env.NEXT_PUBLIC_WS_URL ??
+        `${location.protocol === "https:" ? "wss://" : "ws://"}${location.hostname}:8000/api/ws`;
 
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
-      ws.onopen = () => {
-        if (process.env.NODE_ENV === "development") {
-          console.log("[WS] conectado:", wsUrl);
-        }
-      };
+      ws.onopen = () => {
+        if (process.env.NODE_ENV === "development") {
+          console.log("[WS] conectado:", wsUrl);
+        }
+      };
 
-      ws.onmessage = (ev) => {
-        try {
-          const msg = JSON.parse(ev.data);
-          if (msg?.type === "NEW_ARTICLES") {
-            queryClient.invalidateQueries({ queryKey: ["articles"] });
-          }
-        } catch {
-          // mensagens não-JSON (ex.: ping/pong), ignorar
-        }
-      };
+      ws.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg?.type === "NEW_ARTICLES") {
+            // invalida a lista para buscar atualizações
+            queryClient.invalidateQueries({ queryKey: ["articles"] });
+          }
+        } catch {
+          // mensagens não-JSON (ex.: ping/pong), ignorar
+        }
+      };
 
-      ws.onerror = () => {
-        ws.close(); // dispara onclose e reconexão
-      };
+      ws.onerror = () => {
+        ws.close(); // dispara onclose e reconexão
+      };
 
-      ws.onclose = () => {
-        if (stopped) return;
-        reconnectTimer.current = window.setTimeout(connect, 5000);
-      };
-    };
+      ws.onclose = () => {
+        if (stopped) return;
+        reconnectTimer.current = window.setTimeout(connect, 5000);
+      };
+    };
 
-    connect();
+    connect();
 
-    return () => {
-      stopped = true;
-      if (reconnectTimer.current) window.clearTimeout(reconnectTimer.current);
-      wsRef.current?.close();
-    };
-  }, [queryClient, enabled]);
+    return () => {
+      stopped = true;
+      if (reconnectTimer.current) window.clearTimeout(reconnectTimer.current);
+      wsRef.current?.close();
+    };
+  }, [queryClient, enabled]);
 }

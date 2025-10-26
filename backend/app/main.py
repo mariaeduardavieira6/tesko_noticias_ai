@@ -4,6 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.gzip import GZipMiddleware # 👈 NOVO: Importa GZipMiddleware
 
 from .database import Base, engine
 from . import models  # 👈 garante que as tabelas sejam registradas
@@ -14,6 +15,9 @@ from .ws import manager  # precisa ter connect/ disconnect/ broadcast
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Tesko Notícias AI API")
+
+# ⬇️ Compressão de respostas a partir de 500 bytes 👈 NOVO: Adiciona GZip
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # ---------- CORS ----------
 origins_env = os.getenv("ALLOW_ORIGINS", "")
@@ -83,4 +87,3 @@ async def emit_dev_event(payload: dict):
     return {"ok": True, "sent": payload}
 
 app.include_router(dev_router)
-
