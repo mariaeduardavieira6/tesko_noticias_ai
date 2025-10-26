@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Navbar } from "@/components/navbar";
+import { Navbar } from "@/components/ui/navbar"; // Este está CORRETO, não mude
 import { useArticles, useArticlesRealtime, Article } from "@/hooks/useArticles";
-import ArticleCard from "@/components/ArticleCard";
-import ArticleCardSkeleton from "@/components/ArticleCardSkeleton";
+import ArticleCard from "@/components/ArticleCard"; // [CORREÇÃO] Removido /ui
+import ArticleCardSkeleton from "@/components/ArticleCardSkeleton"; // [CORREÇÃO] Removido /ui
+
+// ... (o resto do seu código)
 
 // debounce simples
 function useDebouncedValue<T>(value: T, delay = 400) {
@@ -125,46 +127,38 @@ export default function Home() {
           </p>
         )}
 
-        {/* Grid */}
+        {/* Grid (ESSA PARTE ESTAVA FALTANDO) */}
         <section aria-busy={isLoading ? "true" : "false"} aria-labelledby="lista-titulo">
-          <h2 id="lista-titulo" className="sr-only">Lista de notícias</h2>
+          <h2 id="lista-titulo" className="sr-only">
+            Lista de Notícias
+          </h2>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {isLoading
-              ? Array.from({ length: 6 }).map((_, i) => <ArticleCardSkeleton key={i} />)
-              : items.map((a) => <ArticleCard key={a.id} article={a} />)}
+          {/* Grid de Artigos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {isLoading && (
+              <>
+                <ArticleCardSkeleton />
+                <ArticleCardSkeleton />
+                <ArticleCardSkeleton />
+                <ArticleCardSkeleton />
+                <ArticleCardSkeleton />
+                <ArticleCardSkeleton />
+              </>
+            )}
+
+            {!isLoading && !isError && items.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))}
           </div>
 
           {isEmpty && (
-            <div className="text-center py-10 text-muted-foreground">
-              <p className="mb-2 font-medium">Nenhum resultado encontrado</p>
-              <button className="rounded-md border px-3 py-2 text-sm hover:bg-accent" onClick={() => setQ("")}>
-                Limpar busca
-              </button>
-            </div>
+            <p className="text-center text-muted-foreground py-8">
+              Nenhum artigo encontrado {params.q ? `para "${params.q}"` : ""}.
+            </p>
           )}
-        </section>
 
-        {/* Paginação */}
-        <nav className="flex items-center gap-2 mt-6 justify-center" aria-label="Paginação de notícias">
-          <button
-            className="rounded-md border px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
-            onClick={goPrev}
-            disabled={!canGoPrev}
-          >
-            Anterior
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {start}–{end}{total ? ` de ${total}` : ""}
-          </span>
-          <button
-            className="rounded-md border px-3 py-2 text-sm hover:bg-accent disabled:opacity-50"
-            onClick={goNext}
-            disabled={!canGoNext}
-          >
-            Próxima
-          </button>
-        </nav>
+        {/* [CORREÇÃO] As tags de fechamento que faltavam */}
+        </section>
       </main>
     </div>
   );

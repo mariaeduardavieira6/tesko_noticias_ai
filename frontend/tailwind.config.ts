@@ -1,22 +1,23 @@
-import type { Config } from "tailwindcss"
+// [CORREÇÃO] Removemos a importação do "Config"
+// import type { Config } from "tailwindcss"
 
-const config: Config = {
-  // Tailwind v4
+// [CORREÇÃO] Removemos o ": Config" da linha abaixo
+const config = {
   darkMode: "class",
   content: [
-    "./src/app/**/*.{ts,tsx}",
-    "./src/components/**/*.{ts,tsx}",
-    "./src/lib/**/*.{ts,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  
+  // Isso força o Tailwind a gerar essas classes
+  safelist: [
+    'md:grid-cols-2',
+    'lg:grid-cols-3',
+  ],
+
   theme: {
-    extend: {}, // se quiser fontes/cores extras depois, colocamos aqui
+    extend: {},
   },
-  plugins: [], // podemos adicionar plugins depois; no v4 é opcional
+  plugins: [],
 }
 
-export default {
-  darkMode: "class",
-  content: ["./src/app/**/*.{ts,tsx}","./src/components/**/*.{ts,tsx}","./src/lib/**/*.{ts,tsx}"],
-}
-
-
+export default config
