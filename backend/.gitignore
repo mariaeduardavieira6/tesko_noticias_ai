@@ -1,3 +1,6 @@
+# Dependências do Node
+node_modules
+
 # Ambiente virtual
 .venv/
 venv/

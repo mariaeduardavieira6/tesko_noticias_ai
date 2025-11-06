@@ -1,3 +1,13 @@
 {
-    "python-envs.pythonProjects": []
+  "python-envs.pythonProjects": [],
+
+  // Desativa a validação de CSS padrão (que causa o erro)
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+
+  // Força o VS Code a ler arquivos .css como Tailwind
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
 }
