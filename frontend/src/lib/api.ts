@@ -3,7 +3,7 @@ const API_BASE =
 
 export async function getJSON<T>(
   path: string,
-  params?: Record<string, any>
+  params?: Record<string, unknown>
 ): Promise<T> {
   const url = new URL(path, API_BASE);
 

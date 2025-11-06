@@ -1,109 +1,108 @@
-"use client";
-
-import { memo } from "react";
+// components/ArticleCard.tsx
+import type { NewsArticle } from "@/types/news";
 import Link from "next/link";
-import Image from "next/image";
-import type { ArticleOut as Article } from "@/types/article";
-import { normalizeImageUrl } from "@/lib/images"; // ✅ normaliza placehold.co → .png
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Share2, Linkedin, ExternalLink } from "lucide-react";
+import { Button } from "./ui/button";
+import SafeImage from "@/components/SafeImage";
 
-type Props = { article: Article };
+function formatDate(dateString: string) {
+  return new Date(dateString).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
 
-const ArticleCardComponent = ({ article }: Props) => {
-  // Garante que published_at sempre é string ISO
-  const pubISO =
-    typeof article.published_at === "string"
-      ? article.published_at
-      : new Date(article.published_at ?? Date.now()).toISOString();
+export function ArticleCard({ article }: { article: NewsArticle }) {
+  const categoryName = article.categories?.[0]?.name ?? "Notícia";
+  const displayDate = formatDate(article.published_at);
 
-  // Fallbacks de imagem e resumo
-  const rawImg = article.image ?? article.image_url;
-  const img = normalizeImageUrl(rawImg, "/placeholder.png"); // ✅ evita SVG
-  const summary = article.summary ?? "";
-  const title = article.title ?? "Sem título";
+  const handleIconClick = (e: React.MouseEvent, url: string) => {
+    e.stopPropagation();
+    e.preventDefault();
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
-    <article
-      className="rounded-2xl border p-4 shadow-sm hover:shadow-md transition bg-card text-card-foreground"
-      aria-labelledby={`art-${article.id}-title`}
+    <Link
+      href={`/noticia/${article.id}`}
+      className={cn(
+        "group",
+        "flex flex-col",
+        "bg-card border border-border rounded-2xl overflow-hidden",
+        "transition-all duration-300 ease-out",
+        "ring-brand card-glow glow-brand"
+      )}
     >
-      {/* Imagem */}
-      <Link href={`/articles/${article.id}`} prefetch={false}>
-        <div className="relative aspect-video w-full mb-3 overflow-hidden rounded-xl">
-          <Image
-            src={img}
-            alt={title}
-            fill
-            sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover"
-            loading="lazy"        // ✅ evita carregar tudo de uma vez
-            decoding="async"      // ✅ prioriza interatividade
-          />
+      {/* Imagem e Categoria */}
+      <div className="relative w-full aspect-video overflow-hidden">
+        <SafeImage
+          src={article.image_url || article.image || "https://placehold.co/800x450/jpg"}
+          alt={article.title}
+          w={800}
+          h={450}
+          className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+        />
+        <Badge
+          className={cn(
+            "absolute top-3 left-3 border-none text-xs font-bold shadow-lg",
+            "bg-muted text-muted-foreground",
+            "transition-colors duration-300",
+            "tag-gradient-on-hover"
+          )}
+        >
+          {categoryName}
+        </Badge>
+      </div>
+
+      {/* Conteúdo */}
+      <div className="flex flex-col flex-1 p-6">
+        <div className="mb-2 text-xs font-medium text-muted-foreground">
+          <span>{article.source}</span>
+          <span className="mx-1.5">•</span>
+          <span>{displayDate}</span>
         </div>
-      </Link>
 
-      {/* Título → navega para a página de detalhes */}
-      <Link
-        href={`/articles/${article.id}`}
-        prefetch={false} // ✅ não pré-carrega a rota de detalhes
-        aria-label={`Abrir detalhes da notícia: ${title}`}
-      >
-        <h3
-          id={`art-${article.id}-title`}
-          className="font-semibold text-lg hover:underline cursor-pointer line-clamp-2"
-        >
-          {title}
+        <h3 className="text-base font-semibold text-foreground line-clamp-2 mb-2 transition-colors text-gradient-on-hover">
+          {article.title}
         </h3>
-      </Link>
 
-      {/* Resumo */}
-      {summary && (
-        <p className="text-sm text-muted-foreground mt-2 line-clamp-3">
-          {summary}
+        <p className="text-sm text-muted-foreground line-clamp-3 flex-1 desc-purple-on-hover">
+          {article.summary}
         </p>
-      )}
 
-      {/* (Opcional) Categorias / Empresas */}
-      <div className="flex flex-wrap gap-2 mt-3">
-        {article.categories?.map((cat) => (
-          <span
-            key={cat.id}
-            className="text-xs bg-muted px-2 py-1 rounded-md text-foreground/70"
+        <div className="flex items-center gap-2 pt-5 mt-auto border-t border-border/50 text-muted-foreground">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            aria-label="Compartilhar"
+            onClick={(e) => handleIconClick(e, `https://twitter.com/intent/tweet?url=${article.url}&text=${article.title}`)}
           >
-            {cat.name}
-          </span>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap gap-2 mt-2">
-        {article.companies?.map((comp) => (
-          <span
-            key={comp.id}
-            className="text-xs bg-muted px-2 py-1 rounded-md text-foreground/70"
+            <Share2 className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full"
+            aria-label="LinkedIn"
+            onClick={(e) => handleIconClick(e, `https://www.linkedin.com/shareArticle?mini=true&url=${article.url}`)}
           >
-            {comp.name}
-          </span>
-        ))}
+            <Linkedin className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 rounded-full ml-auto"
+            aria-label="Fonte original"
+            onClick={(e) => handleIconClick(e, article.url)}
+          >
+            <ExternalLink className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
-
-      {/* Data de publicação semântica */}
-      <div className="text-xs mt-3 opacity-70">
-        <time dateTime={pubISO}>{new Date(pubISO).toLocaleString("pt-BR")}</time>
-      </div>
-
-      {/* Link externo para a fonte */}
-      {article.url && (
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-sm mt-3 inline-block underline hover:text-blue-600"
-          aria-label="Abrir fonte original em nova aba"
-        >
-          Ver fonte
-        </a>
-      )}
-    </article>
+    </Link>
   );
-};
-
-export default memo(ArticleCardComponent);
+}

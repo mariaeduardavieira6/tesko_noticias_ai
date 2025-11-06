@@ -1,82 +1,106 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* === Tokens shadcn para claro/escuro === */
-:root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
+@layer base {
+  :root {
+    --background: oklch(0.98 0 0);
+    --foreground: oklch(0.15 0 0);
+    --card: oklch(0.98 0 0);
+    --card-foreground: oklch(0.15 0 0);
+    --popover: oklch(0.98 0 0);
+    --popover-foreground: oklch(0.15 0 0);
+    --primary: oklch(0.25 0 0);
+    --primary-foreground: oklch(1 0 0);
+    --secondary: oklch(0.95 0 0);
+    --secondary-foreground: oklch(0.25 0 0);
+    --muted: oklch(0.94 0 0);
+    --muted-foreground: oklch(0.45 0 0);
+    --accent: oklch(0.94 0 0);
+    --accent-foreground: oklch(0.25 0 0);
+    --border: oklch(0.88 0 0);
+    --input: oklch(0.88 0 0);
+    --ring: oklch(0.55 0 0);
+    --radius: 0.625rem;
+  }
 
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
+  .dark {
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.145 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(0.145 0 0);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.985 0 0);
+    --primary-foreground: oklch(0.205 0 0);
+    --secondary: oklch(0.269 0 0);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.8 0 0);
+    --accent: oklch(0.269 0 0);
+    --accent-foreground: oklch(0.985 0 0);
+    --border: oklch(0.269 0 0);
+    --input: oklch(0.269 0 0);
+    --ring: oklch(0.439 0 0);
+  }
 
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
+  * {
+    @apply border-border outline-ring/50;
+  }
 
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  body {
+    @apply bg-background text-foreground;
+  }
 
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-
-  --destructive: 0 72.2% 50.6%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  html, body, header, main, footer, input, div {
+    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
+  }
 }
 
-/* tema escuro */
-.dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
+@layer utilities {
+  .btn-icon-glow-strong {
+    @apply text-muted-foreground rounded-lg transition-all duration-200;
+  }
+  .btn-icon-glow-strong:hover,
+  .btn-icon-glow-strong:focus-visible {
+    color: white !important;
+    background-color: #1A1A22 !important;
+    box-shadow: 0 0 15px 5px rgba(43,177,232,0.45),
+                0 0 25px 10px rgba(166,63,142,0.4);
+    transform: scale(1.12);
+  }
 
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
+  .glow-brand {
+    transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
+  }
+  .glow-brand:hover,
+  .glow-brand:focus,
+  .glow-brand:focus-visible,
+  .glow-brand:focus-within {
+    transform: translateZ(0) scale(1.03);
+    filter:
+      drop-shadow(0 0 10px rgba(77,88,240,.45))
+      drop-shadow(0 0 18px rgba(166,63,142,.35));
+  }
 
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
-}
-
-/* aplica no app inteiro */
-html,
-body {
-  min-height: 100%;
-}
-
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-}
-
-/* (opcional) utilitária p/ evitar quebra de cards no masonry */
-.break-inside-avoid {
-  break-inside: avoid;
-}
-
-:focus-visible {
-  outline: 2px solid;
-  outline-offset: 3px;
+  .card-glow {
+    position: relative;
+    isolation: isolate;
+    transition: transform .25s ease;
+  }
+  .card-glow::after {
+    content: "";
+    position: absolute;
+    inset: -10%;
+    z-index: -1;
+    border-radius: 24px;
+    background: radial-gradient(70% 70% at 50% 40%, rgba(77,88,240,.35), rgba(166,63,142,.25) 60%, transparent 70%);
+    opacity: 0;
+    filter: blur(22px);
+    transition: opacity .25s ease;
+  }
+  .card-glow:hover::after,
+  .card-glow:focus-within::after {
+    opacity: 1;
+  }
 }

@@ -1,169 +1,147 @@
-// src/app/articles/[id]/page.tsx
-import { Suspense } from "react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { fetchArticle } from "@/services/articles";
-import type { ArticleOut } from "@/types/article";
-import SafeImage from "@/components/SafeImage";
+import { newsData } from "@/data/news"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { ArticleCard } from "@/components/ArticleCard" // <-- CORRIGIDO o nome (de NewsCard)
+import { AudioWaveform, Download, ArrowLeft, X, Linkedin, Copy, ExternalLink } from "lucide-react"
+import SafeImage from "@/components/SafeImage"
+import Link from "next/link"
+import { notFound } from "next/navigation"
 
-export const dynamic = "force-dynamic";
+// -----------------------------
+// DATA
+// -----------------------------
+async function getNewsById(id: string) {
+  const numericId = parseInt(id)
+  if (isNaN(numericId)) return null
 
-const SITE =
-  (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/$/, "");
+  const article = newsData.find(news => news.id === numericId)
+  if (!article) return null
 
-// -------- SEO dinâmico --------
-export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> }
-): Promise<Metadata> {
-  const { id } = await params;
-  try {
-    const article: ArticleOut = await fetchArticle(id);
-    const img = (article as any).image ?? (article as any).image_url;
+  const relatedNews = newsData
+    .filter(news => news.id !== numericId)
+    .slice(0, 3)
 
-    const title = article.title || "Artigo";
-    const description = (article.summary ?? "Detalhes do artigo").slice(0, 160);
-    const canonical = `${SITE}/articles/${article.id}`;
-
-    return {
-      title,
-      description,
-      alternates: { canonical },
-      openGraph: {
-        type: "article",
-        title,
-        description,
-        images: img ? [{ url: img }] : undefined,
-        url: canonical,
-      },
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description,
-        images: img ? [img] : undefined,
-      },
-    };
-  } catch {
-    return { title: "Artigo", description: "Detalhes do artigo" };
-  }
+  return { article, relatedNews }
 }
 
-// -------- Client section --------
-function ArticleClient({ article }: { article: ArticleOut }) {
-  const img = (article as any).image ?? (article as any).image_url;
+// -----------------------------
+// PAGE
+// -----------------------------
+export default async function NoticiaPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  const data = await getNewsById(id)
+  if (!data) notFound()
 
-  const published = new Date(article.published_at);
-  const formatted = new Intl.DateTimeFormat("pt-BR", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(published);
+  const { article, relatedNews } = data
+  
+  // CORRIGIDO: de article.date para article.published_at
+  const displayDate = new Date(article.published_at).toLocaleDateString("pt-BR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    datePublished: new Date(article.published_at).toISOString(),
-    image: img ? [img] : undefined,
-    mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE}/articles/${article.id}` },
-    description: article.summary,
-  };
+  // CORRIGIDO: Pega o nome da primeira categoria do array
+  const categoryName = article.categories?.[0]?.name ?? 'Notícia'
 
-  return (
-    <main className="max-w-4xl mx-auto p-6">
-      <script
-        key="article-jsonld"
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+  return (
+    <div className="flex flex-col min-h-screen">
+      <div className="container mx-auto max-w-screen-xl px-4 py-12 flex-1">
+        <main className="max-w-5xl mx-auto">
+          <Button asChild variant="ghost" className="mb-8 text-muted-foreground hover:text-foreground transition-colors duration-150">
+            <Link href="/"><ArrowLeft className="w-4 h-4 mr-2" />Voltar para Home</Link>
+          </Button>
 
-      <header className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">{article.title}</h1>
-        <p className="text-sm text-gray-600">Publicado em {formatted}</p>
+          {/* Cabeçalho */}
+          <div className="space-y-4 mb-6">
+            <Badge className="bg-gradient-to-r from-cyan-500 via-purple-600 to-magenta-600 text-white border-none text-sm font-bold shadow-lg">
+              {categoryName} {/* <-- CORRIGIDO */}
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold text-balance text-foreground">{article.title}</h1>
+            <div className="flex items-center gap-2 pt-2">
+              <span className="text-base font-medium text-foreground">{article.source}</span>
+              <span className="text-muted-foreground/50">•</span>
+              <span className="text-base text-muted-foreground">{displayDate}</span>
+            </div>
+          </div>
 
-        {(article.categories?.length || article.companies?.length) ? (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {article.categories?.map((c) => (
-              <span key={c.id} className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                #{c.name}
-              </span>
-            ))}
-            {article.companies?.map((c) => (
-              <span key={c.id} className="text-xs px-2 py-1 rounded-full bg-gray-100">
-                @{c.name}
-              </span>
-            ))}
-          </div>
-        ) : null}
-      </header>
+          {/* Ações */}
+          <div className="flex flex-col sm:flex-row gap-4 my-8">
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-cyan-500 via-purple-600 to-magenta-600 text-white shadow-lg glow-brand"
+            >
+              <AudioWaveform className="w-5 h-5 mr-2" />Ouvir a Notícia
+            </Button>
 
-      {img && (
-        <div className="relative w-full h-64 md:h-96 mb-6 overflow-hidden rounded-2xl">
-          <SafeImage src={img} alt={article.title} w={1200} h={630} />
-        </div>
-      )}
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-foreground border-border glow-brand border-gradient"
+            >
+              <Download className="w-5 h-5 mr-2 icon-gradient" />
+              Download PDF
+            </Button>
 
-      {article.summary && <p className="text-lg leading-7 mb-6">{article.summary}</p>}
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="text-foreground border-border glow-brand border-gradient"
+            >
+              {/* CORRIGIDO: de article.sourceUrl para article.url */}
+              <a href={article.url} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="w-5 h-5 mr-2 icon-gradient" />
+                Ver Fonte Original
+              </a>
+            </Button>
+          </div>
 
-      <section className="grid sm:grid-cols-2 gap-4 mb-8">
-        <a
-          href={article.pdf ?? "#"}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-          className={`px-4 py-3 rounded-xl text-center border transition
-            ${article.pdf ? "hover:shadow" : "opacity-50 cursor-not-allowed"}`}
-          aria-disabled={!article.pdf}
-          download={Boolean(article.pdf) || undefined}
-        >
-          {article.pdf ? "Baixar PDF" : "PDF indisponível"}
-        </a>
+          {/* Imagem do Artigo – agora com glow */}
+          <div className="w-full rounded-2xl overflow-hidden border border-border my-10 card-glow glow-brand">
+            <SafeImage
+              src={article.image_url || article.image || "https://placehold.co/800x450/jpg"}
+              alt={article.title}
+              w={800}
+              h={450}
+              className="object-cover w-full h-auto"
+              sizes="(min-width:1024px) 800px, 100vw"
+            />
+          </div>
 
-        <div className="rounded-xl border p-4">
-          <p className="text-sm mb-2 font-medium">Ouvir notícia</p>
-          {article.audio ? (
-            <audio controls className="w-full" preload="none">
-              <source src={article.audio} type="audio/mpeg" />
-              Seu navegador não suporta o player de áudio.
-            </audio>
-          ) : (
-            <p className="text-sm text-gray-600">Áudio indisponível</p>
-          )}
-        </div>
-      </section>
+          {/* Conteúdo */}
+          <div
+            className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-ul:list-disc prose-ul:pl-6 prose-p:text-muted-foreground prose-a:text-blue-600 hover:prose-a:text-blue-800 dark:prose-invert dark:prose-a:text-purple-400 dark:hover:prose-a:text-purple-300"
+            // Fallback para summary, usando tipagem do NewsArticle
+            dangerouslySetInnerHTML={{ __html: article.content ?? article.summary ?? "" }}
+          />
 
-      {article.url && (
-        <a
-          href={article.url}
-          target="_blank"
-          rel="noopener noreferrer nofollow"
-          className="text-sm underline"
-        >
-          Ver fonte original
-        </a>
-      )}
+          {/* Compartilhar */}
+          <div className="mt-12 pt-8 border-t border-border">
+            <h3 className="text-lg font-semibold text-foreground mb-4">Compartilhar esta notícia</h3>
+            <div className="flex gap-4">
+              <Button variant="outline" className="text-muted-foreground border-border glow-brand border-gradient">
+                <X className="w-4 h-4 mr-2 icon-gradient" /> Twitter
+              </Button>
+              <Button variant="outline" className="text-muted-foreground border-border glow-brand border-gradient">
+                <Linkedin className="w-4 h-4 mr-2 icon-gradient" /> LinkedIn
+              </Button>
+              <Button variant="outline" className="text-muted-foreground border-border glow-brand border-gradient">
+                <Copy className="w-4 h-4 mr-2 icon-gradient" /> Copiar Link
+              </Button>
+            </div>
+          </div>
+        </main>
 
-      <div className="mt-8">
-        <Link href="/" className="text-sm underline">
-          ← Voltar para a dashboard
-        </Link>
-      </div>
-    </main>
-  );
-}
-
-// -------- Server: busca e 404 --------
-export default async function ArticlePage(
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id } = await params;
-  try {
-    const article = await fetchArticle(id);
-    if (!article?.id) notFound();
-    return (
-      <Suspense fallback={<div />}>
-        <ArticleClient article={article} />
-      </Suspense>
-    );
-  } catch {
-    notFound();
-  }
+        {/* Mais Notícias */}
+        <aside className="max-w-screen-xl mx-auto mt-20 pt-12 border-t border-border">
+          <h2 className="text-3xl font-bold text-foreground mb-8">Mais Notícias</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* CORRIGIDO: de NewsCard para ArticleCard e de 'news' para 'article' */}
+            {relatedNews.map((news) => (<ArticleCard key={news.id} article={news} />))}
+          </div>
+        </aside>
+      </div>
+    </div>
+  )
 }

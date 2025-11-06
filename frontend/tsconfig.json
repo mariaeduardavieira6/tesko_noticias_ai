@@ -1,25 +1,50 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [{ "name": "next" }],
+    /* --- Configurações Básicas de Tipo --- */
+    "target": "es5", // Compila para JavaScript ES5 para maior compatibilidade
+    "lib": ["dom", "dom.iterable", "esnext"], // Bibliotecas padrão do navegador e ESNext
+    "allowJs": true, // Permite que arquivos .js sejam importados em .ts
+    "skipLibCheck": true, // Pula a verificação de tipos em arquivos de definição (.d.ts)
+    "strict": true, // Habilita todas as verificações estritas de tipo (causa dos erros 'any')
+    "forceConsistentCasingInFileNames": true, // Garante que os nomes dos arquivos sejam consistentes
 
-    "baseUrl": "src",
+    /* --- Configurações de Módulo --- */
+    "module": "esnext", // Usa o sistema de módulos ESNext
+    "moduleResolution": "bundler", // Estratégia moderna de resolução de módulos
+    "resolveJsonModule": true, // Permite importar arquivos .json
+    "isolatedModules": true, // Garante que cada arquivo possa ser transpilado separadamente
+    
+    /* --- Configurações de Emissão --- */
+    "noEmit": true, // Não gera arquivos de saída (o Next.js cuida disso)
+    "jsx": "preserve", // Preserva o JSX para o Next.js processar
+    "incremental": true, // Habilita a compilação incremental
+    "esModuleInterop": true, // Permite interoperabilidade com módulos CommonJS
+
+    /* --- [A CORREÇÃO PRINCIPAL] Aliases de Path --- */
+    // Diz ao TypeScript onde encontrar os módulos
+    "baseUrl": ".", // A raiz para os 'paths' é o diretório atual (onde está o tsconfig.json)
     "paths": {
-      "@/*": ["*"]
-    }
+      "@/*": ["./src/*"] // Mapeia o atalho '@/' para a pasta './src/'
+    },
+
+    /* --- Configuração do Next.js --- */
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  
+  /* --- Arquivos Incluídos na Verificação --- */
+  "include": [
+    "next-env.d.ts", // Tipos globais do Next.js
+    "**/*.ts", // Todos os arquivos TypeScript
+    "**/*.tsx", // Todos os arquivos TypeScript com React (JSX)
+    ".next/types/**/*.ts" // Tipos gerados pelo Next.js
+  ],
+  
+  /* --- Arquivos Excluídos da Verificação --- */
+  "exclude": [
+    "node_modules" // Pasta de dependências
+  ]
 }

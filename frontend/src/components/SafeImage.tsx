@@ -15,12 +15,14 @@ export default function SafeImage({
   w = 800,
   h = 480,
   className = "object-cover rounded-2xl",
+  sizes,
 }: {
   src?: string;
   alt: string;
   w?: number;
   h?: number;
   className?: string;
+  sizes?: string;
 }) {
   if (!src) return null;
   try {
@@ -36,15 +38,17 @@ export default function SafeImage({
 
     // se for SVG explícito, usa <img> (evita dangerouslyAllowSVG)
     if (/\.svg$/i.test(u.pathname)) {
+      // eslint-disable-next-line @next/next/no-img-element
       return <img src={src} alt={alt} className={className + " w-full h-auto"} loading="lazy" />;
     }
 
     // hosts permitidos -> usa next/image
     if (allowed.has(host)) {
-      return <Image src={src} alt={alt} width={w} height={h} className={className} />;
+      return <Image src={src} alt={alt} width={w} height={h} className={className} sizes={sizes} />;
     }
   } catch {
     // URL inválida: cai no fallback
   }
+  // eslint-disable-next-line @next/next/no-img-element
   return <img src={src} alt={alt} className={className + " w-full h-auto"} loading="lazy" />;
 }
