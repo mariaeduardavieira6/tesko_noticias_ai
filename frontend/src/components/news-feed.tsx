@@ -1,7 +1,7 @@
-// components/news-feed.tsx
+// Em: components/news-feed.tsx
 "use client"
 
-import { ArticleCard } from "@/components/ArticleCard"
+import { NewsCard } from "@/components/card"
 import { newsData } from "@/data/news"
 
 interface NewsFeedProps {
@@ -13,38 +13,41 @@ interface NewsFeedProps {
 export function NewsFeed({ category, sourceFilter, searchQuery }: NewsFeedProps) {
   let filteredNews = newsData
 
+  // Filtro Categoria
   if (category !== "Últimas notícias") {
-    filteredNews = filteredNews.filter((news) =>
-      news.categories?.some((cat) => cat.name === category)
-    )
+    filteredNews = filteredNews.filter((news) => news.category === category)
   }
 
+  // Filtro Fonte
   if (sourceFilter) {
     filteredNews = filteredNews.filter((news) => news.source === sourceFilter)
   }
-
+  
+  // Filtro por busca (título/descrição)
+  // searchQuery é opcional e pode vir do Header/HomeClient
+  // Se não vier, simplesmente ignoramos
   if (searchQuery && searchQuery.trim()) {
-    const q = searchQuery.trim().toLowerCase()
-    filteredNews = filteredNews.filter((news) => {
-      const title = news.title?.toLowerCase() ?? ""
-      const summary = news.summary?.toLowerCase() ?? ""
-      const categories = (news.categories ?? []).map(c => c.name.toLowerCase()).join(" ")
-      const companies = (news.companies ?? []).map(c => c.name.toLowerCase()).join(" ")
-      return title.includes(q) || summary.includes(q) || categories.includes(q) || companies.includes(q)
-    })
+    const term = searchQuery.toLowerCase()
+    filteredNews = filteredNews.filter(
+      (n) => n.title.toLowerCase().includes(term) || n.description.toLowerCase().includes(term)
+    )
   }
 
   return (
-    <div className="columns-1 sm:columns-2 lg:columns-2 xl:columns-3 gap-6">
+    // <-- MUDANÇA: Voltamos para no máximo 4 colunas em telas XL.
+    // Isso vai deixar os cards MAIS LARGOS.
+    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6"> 
+      
       {filteredNews.length > 0 ? (
         filteredNews.map((news) => (
-          <ArticleCard key={news.id} article={news} />
+          <NewsCard key={news.id} news={news} />
         ))
       ) : (
-        <p className="text-muted-foreground">
+        <p className="text-gray-400">
           Nenhuma notícia encontrada com os filtros aplicados.
         </p>
       )}
+
     </div>
   )
 }

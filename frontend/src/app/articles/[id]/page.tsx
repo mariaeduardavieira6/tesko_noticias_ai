@@ -1,9 +1,11 @@
+// app/noticia/[id]/page.tsx
+
 import { newsData } from "@/data/news"
+import type { NewsArticle } from "@/data/news"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ArticleCard } from "@/components/ArticleCard" // <-- CORRIGIDO o nome (de NewsCard)
+import { NewsCard } from "@/components/news-card"
 import { AudioWaveform, Download, ArrowLeft, X, Linkedin, Copy, ExternalLink } from "lucide-react"
-import SafeImage from "@/components/SafeImage"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 
@@ -27,22 +29,16 @@ async function getNewsById(id: string) {
 // -----------------------------
 // PAGE
 // -----------------------------
-export default async function NoticiaPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const data = await getNewsById(id)
+export default async function NoticiaPage({ params }: { params: { id: string } }) {
+  const data = await getNewsById(params.id)
   if (!data) notFound()
 
   const { article, relatedNews } = data
-  
-  // CORRIGIDO: de article.date para article.published_at
-  const displayDate = new Date(article.published_at).toLocaleDateString("pt-BR", {
+  const displayDate = new Date(article.date).toLocaleDateString("pt-BR", {
     year: "numeric",
     month: "long",
     day: "numeric",
   })
-
-  // CORRIGIDO: Pega o nome da primeira categoria do array
-  const categoryName = article.categories?.[0]?.name ?? 'Notícia'
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -55,7 +51,7 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
           {/* Cabeçalho */}
           <div className="space-y-4 mb-6">
             <Badge className="bg-gradient-to-r from-cyan-500 via-purple-600 to-magenta-600 text-white border-none text-sm font-bold shadow-lg">
-              {categoryName} {/* <-- CORRIGIDO */}
+              {article.category}
             </Badge>
             <h1 className="text-4xl md:text-5xl font-bold text-balance text-foreground">{article.title}</h1>
             <div className="flex items-center gap-2 pt-2">
@@ -89,8 +85,7 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
               variant="outline"
               className="text-foreground border-border glow-brand border-gradient"
             >
-              {/* CORRIGIDO: de article.sourceUrl para article.url */}
-              <a href={article.url} target="_blank" rel="noopener noreferrer">
+              <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="w-5 h-5 mr-2 icon-gradient" />
                 Ver Fonte Original
               </a>
@@ -99,21 +94,17 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
 
           {/* Imagem do Artigo – agora com glow */}
           <div className="w-full rounded-2xl overflow-hidden border border-border my-10 card-glow glow-brand">
-            <SafeImage
-              src={article.image_url || article.image || "https://placehold.co/800x450/jpg"}
+            <img
+              src={article.image}
               alt={article.title}
-              w={800}
-              h={450}
-              className="object-cover w-full h-auto"
-              sizes="(min-width:1024px) 800px, 100vw"
+              className="w-full h-auto object-cover"
             />
           </div>
 
           {/* Conteúdo */}
           <div
             className="prose prose-lg max-w-none prose-headings:font-bold prose-headings:text-foreground prose-strong:text-foreground prose-ul:list-disc prose-ul:pl-6 prose-p:text-muted-foreground prose-a:text-blue-600 hover:prose-a:text-blue-800 dark:prose-invert dark:prose-a:text-purple-400 dark:hover:prose-a:text-purple-300"
-            // Fallback para summary, usando tipagem do NewsArticle
-            dangerouslySetInnerHTML={{ __html: article.content ?? article.summary ?? "" }}
+            dangerouslySetInnerHTML={{ __html: article.content || "" }}
           />
 
           {/* Compartilhar */}
@@ -137,8 +128,7 @@ export default async function NoticiaPage({ params }: { params: Promise<{ id: st
         <aside className="max-w-screen-xl mx-auto mt-20 pt-12 border-t border-border">
           <h2 className="text-3xl font-bold text-foreground mb-8">Mais Notícias</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* CORRIGIDO: de NewsCard para ArticleCard e de 'news' para 'article' */}
-            {relatedNews.map((news) => (<ArticleCard key={news.id} article={news} />))}
+            {relatedNews.map((news) => (<NewsCard key={news.id} news={news} />))}
           </div>
         </aside>
       </div>

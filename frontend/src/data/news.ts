@@ -1,60 +1,198 @@
-// frontend/src/data/news.ts
-import type { NewsArticle } from '@/types/news'; // Importa seu tipo existente
+// Em: data/news.ts
 
-// Exporta os dados com o tipo correto
+// 1. Definição do tipo (AGORA COM "sourceUrl")
+export type NewsArticle = {
+  id: number
+  title: string
+  description: string
+  category: string
+  image: string
+  date: string
+  content: string 
+  source: string 
+  sourceUrl: string // <--- O CAMPO QUE FALTAVA
+}
+
+// 3. Seus dados (AGORA COM "sourceUrl")
 export const newsData: NewsArticle[] = [
   {
     id: 1,
-    title: 'OpenAI Lança Novo Modelo de IA com Capacidades Avançadas',
-    summary: 'A OpenAI apresentou hoje o GPT-5, um modelo que promete revolucionar a interação...',
-    url: 'https://example.com/news/1',
-    image_url: 'https://images.unsplash.com/photo-1677756128484-aef87f7d1487?q=80&w=1932&auto=format&fit=crop',
-    published_at: '2025-10-23T12:00:00Z',
-    categories: [{ id: 1, name: 'Lançamentos' }],
-    source: 'OpenAI',
-    // --- NOVO CAMPO 'content' ---
+    title: "OpenAI Lança Novo Modelo de IA com Capacidades Avançadas",
+    description: "A OpenAI apresentou um novo modelo de linguagem...",
+    category: "Lançamentos",
+    image: "/openai-ai-model-launch.jpg",
+    date: "2025-10-24",
     content: `
-      <p>A OpenAI anunciou hoje o lançamento do GPT-5, seu mais novo modelo de linguagem de grande escala. Especialistas da indústria acreditam que este avanço representa um salto significativo em direção à inteligência artificial geral (AGI).</p>
-      <p>Principais Avanços:</p>
-      <ul>
-        <li>Compreensão de contexto multimodal aprimorada.</li>
-        <li>Capacidade de raciocínio complexo em domínios especializados.</li>
-        <li>Redução drástica em alucinações e geração de fatos incorretos.</li>
-      </ul>
-      <p>O impacto na indústria de tecnologia é esperado para ser imediato, com parceiros beta já relatando ganhos de produtividade sem precedentes.</p>
-    `
+      <p>A OpenAI anunciou hoje o lançamento do GPT-5...</p>
+      <h2>Principais Avanços</h2>
+      <ul>...</ul>
+      <h2>Impacto na Indústria</h2>
+      <p>Especialistas acreditam...</p>
+    `,
+    source: "OpenAI",
+    sourceUrl: "https://openai.com/blog/gpt-5-announcement", // <--- ADICIONADO
   },
   {
     id: 2,
-    title: 'Artigo de Pesquisa Sobre IA',
-    summary: 'Outro resumo interessante sobre IA e seu impacto no mercado de trabalho.',
-    url: 'https://example.com/news/2',
-    image_url: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1770&auto=format&fit=crop',
-    published_at: '2025-10-25T18:30:00Z',
-    categories: [{ id: 2, name: 'Pesquisas' }],
-    source: 'Stanford University',
-    content: `<p>Um novo estudo publicado pela Universidade de Stanford explora o impacto da IA generativa no mercado de trabalho. Ao contrário de previsões pessimistas, o estudo sugere um aumento na demanda por "colaboradores de IA", profissionais especializados em treinar e interagir com modelos de IA.</p>`
+    title: "Google Investe Bilhões em Infraestrutura de IA",
+    description: "A gigante de tecnologia anuncia investimento massivo...",
+    category: "Pesquisas",
+    image: "/google-ai-infrastructure.jpg",
+    date: "2025-10-23",
+    content: `
+      <h2>Investimento Estratégico</h2>
+      <p>O Google detalhou seu plano...</p>
+      <blockquote>...</blockquote>
+    `,
+    source: "Google",
+    sourceUrl: "https://blog.google/technology/ai/infrastructure-investment/", // <--- ADICIONADO
   },
   {
     id: 3,
-    title: 'Notícia de Última Hora sobre Segurança',
-    summary: 'Aconteceu agora, uma nova aliança global de segurança em IA foi formada.',
-    url: 'https://example.com/news/3',
-    image_url: 'https://images.unsplash.com/photo-1696253910356-d70b42b0e2c8?q=80&w=1770&auto=format&fit=crop',
-    published_at: '2025-10-26T15:45:00Z',
-    categories: [{ id: 3, name: 'Políticas' }],
-    source: 'Nações Unidas',
-    content: `<p>Em uma reunião de emergência, líderes globais anunciaram a formação de uma força-tarefa internacional para regulamentar o desenvolvimento de IA superinteligente, focando em protocolos de segurança e transparência.</p>`
+    title: "Meta Desenvolve Novo Algoritmo de Recomendação",
+    description: "Pesquisadores da Meta publicam artigo sobre avanços...",
+    category: "Pesquisas",
+    image: "/meta-recommendation-algorithm.jpg",
+    date: "2025-10-22",
+    content: `
+      <h2>Recomendações Mais Precisas</h2>
+      <p>O novo algoritmo da Meta...</p>
+      <ul>...</ul>
+    `,
+    source: "Meta",
+    sourceUrl: "https://ai.meta.com/blog/contentflow-recommendation-algorithm/", // <--- ADICIONADO
   },
   {
     id: 4,
-    title: 'Ferramentas de IA Generativa Ganham Popularidade',
-    summary: 'Novas ferramentas de IA para criação de conteúdo estão mudando o jogo para criadores.',
-    url: 'https://example.com/news/4',
-    image_url: 'https://images.unsplash.com/photo-1692147434645-ac52c6f17734?q=80&w=1854&auto=format&fit=crop',
-    published_at: '2025-10-20T10:00:00Z',
-    categories: [{ id: 4, name: 'Ferramentas' }],
-    source: 'TechCrunch',
-    content: `<p>A adoção de ferramentas de IA generativa para design gráfico, composição musical e escrita de roteiros disparou no último trimestre. Analisamos as plataformas líderes de mercado.</p>`
+    title: "Ferramentas de IA Generativa Ganham Popularidade",
+    description: "Novas ferramentas de IA para criação de conteúdo...",
+    category: "Ferramentas",
+    image: "/ai-generative-tools.jpg",
+    date: "2025-10-21",
+    content: `
+      <h2>A Explosão Criativa</h2>
+      <p>O mercado de ferramentas generativas...</p>
+      <ul>...</ul>
+    `,
+    source: "TechCrunch",
+    sourceUrl: "https://techcrunch.com/2025/10/21/generative-ai-tools-boom/", // <--- ADICIONADO
   },
-];
+  {
+    id: 5,
+    title: "Reguladores Discutem Novas Políticas para IA",
+    description: "Governos ao redor do mundo começam a estabelecer marcos...",
+    category: "Políticas",
+    image: "/ai-regulation-policy.jpg",
+    date: "2025-10-20",
+    content: `
+      <h2>O Desafio da Regulamentação</h2>
+      <p>O debate sobre regulamentação...</p>
+      <p><strong>Pontos principais...</strong></p>
+      <ul>...</ul>
+    `,
+    source: "Reuters",
+    sourceUrl: "https://www.reuters.com/technology/global-leaders-discuss-ai-regulation/", // <--- ADICIONADO
+  },
+  {
+    id: 6,
+    title: "Startup de IA Recebe Financiamento Recorde",
+    description: "Empresa emergente de inteligência artificial levanta US$ 500 milhões...",
+    category: "Últimas notícias",
+    image: "/ai-startup-funding.jpg",
+    date: "2025-10-19",
+    content: `
+      <h2>'AI Future' Levanta $500M</h2>
+      <p>A startup 'AI Future'...</p>
+      <p>Os fundos serão usados...</p>
+    `,
+    source: "VentureBeat",
+    sourceUrl: "https://venturebeat.com/ai/ai-future-raises-500m-series-b/", // <--- ADICIONADO
+  },
+  {
+    id: 7,
+    title: "Pesquisa Revela Impacto da IA no Mercado de Trabalho",
+    description: "Estudo mostra como inteligência artificial está transformando...",
+    category: "Pesquisas",
+    image: "/ai-impact-workforce.jpg",
+    date: "2025-10-18",
+    content: `
+      <h2>Novas Funções, Novos Desafios</h2>
+      <p>Um novo estudo publicado...</p>
+      <p>A requalificação...</p>
+    `,
+    source: "Stanford University",
+    sourceUrl: "https://hai.stanford.edu/news/ai-impact-workforce-study/", // <--- ADICIONADO
+  },
+  {
+    id: 8,
+    title: "Novo Framework de IA Simplifica Desenvolvimento",
+    description: "Desenvolvedores agora têm acesso a ferramentas mais acessíveis...",
+    category: "Ferramentas",
+    image: "/ai-development-framework.jpg",
+    date: "2025-10-17",
+    content: `
+      <h2>Democratizando a IA</h2>
+      <p>O 'SimpleAI' é um novo framework...</p>
+    `,
+    source: "GitHub",
+    sourceUrl: "https://github.blog/2025-10-17-simpleai-framework-launch/", // <--- ADICIONADO
+  },
+  {
+    id: 9,
+    title: "Universidades Expandem Programas de IA",
+    description: "Instituições de ensino aumentam investimento em cursos...",
+    category: "Últimas notícias",
+    image: "/university-ai-programs.jpg",
+    date: "2025-10-16",
+    content: `
+      <h2>Foco na Próxima Geração</h2>
+      <p>Grandes universidades...</p>
+    `,
+    source: "MIT News",
+    sourceUrl: "https://news.mit.edu/2025/expansion-ai-ethics-labs/", // <--- ADICIONADO
+  },
+  {
+    id: 10,
+    title: "Segurança em IA Torna-se Prioridade Global",
+    description: "Especialistas alertam sobre importância de desenvolver IA segura...",
+    category: "Políticas",
+    image: "/ai-security-safety.jpg",
+    date: "2025-10-15",
+    content: `
+      <h2>Alinhamento e Controle</h2>
+      <p>Em conferência global...</p>
+    `,
+    source: "Nações Unidas",
+    sourceUrl: "https://www.un.org/en/ai-safety-summit-highlights/", // <--- ADICIONADO
+  },
+  {
+    id: 11,
+    title: "Aplicações de IA em Medicina Mostram Resultados Promissores",
+    description: "Pesquisadores demonstram como IA pode melhorar diagnósticos...",
+    category: "Lançamentos",
+    image: "/ai-medicine-healthcare.jpg",
+    date: "2025-10-14",
+    content: `
+      <h2>Diagnósticos Mais Rápidos</h2>
+      <p>Novos algorítmos de IA...</p>
+      <p>Os resultados mostram...</p>
+    `,
+    source: "Nature Medicine",
+    sourceUrl: "https://www.nature.com/articles/s41591-025-01234-x", // <--- ADICIONADO
+  },
+  {
+    id: 12,
+    title: "Empresas Adotam IA para Otimizar Operações",
+    description: "Organizações implementam soluções de IA para aumentar eficiência...",
+    category: "Últimas notícias",
+    image: "/business-ai-optimization.jpg",
+    date: "2025-10-13",
+    content: `
+      <h2>Eficiência Operacional</h2>
+      <p>Da logística ao atendimento ao cliente...</p>
+    `,
+    source: "Forbes",
+    sourceUrl: "https://www.forbes.com/sites/ai/2025/10/13/how-ai-is-optimizing-business-operations/", // <--- ADICIONADO
+  },
+]
+

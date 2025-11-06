@@ -2,74 +2,133 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: oklch(0.98 0 0);
-    --foreground: oklch(0.15 0 0);
-    --card: oklch(0.98 0 0);
-    --card-foreground: oklch(0.15 0 0);
-    --popover: oklch(0.98 0 0);
-    --popover-foreground: oklch(0.15 0 0);
-    --primary: oklch(0.25 0 0);
-    --primary-foreground: oklch(1 0 0);
-    --secondary: oklch(0.95 0 0);
-    --secondary-foreground: oklch(0.25 0 0);
-    --muted: oklch(0.94 0 0);
-    --muted-foreground: oklch(0.45 0 0);
-    --accent: oklch(0.94 0 0);
-    --accent-foreground: oklch(0.25 0 0);
-    --border: oklch(0.88 0 0);
-    --input: oklch(0.88 0 0);
-    --ring: oklch(0.55 0 0);
-    --radius: 0.625rem;
-  }
+/* Tailwind v3: o variant 'dark' já é suportado via classe .dark */
 
-  .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.145 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.145 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.985 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.8 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --border: oklch(0.269 0 0);
-    --input: oklch(0.269 0 0);
-    --ring: oklch(0.439 0 0);
-  }
+/* ===================== */
+/* TOKENS – MODO CLARO   */
+/* ===================== */
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
 
-  * {
-    @apply border-border outline-ring/50;
-  }
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
 
-  body {
-    @apply bg-background text-foreground;
-  }
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
 
-  html, body, header, main, footer, input, div {
-    transition: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease;
-  }
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  --radius: 0.625rem;
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 }
 
-@layer utilities {
-  .btn-icon-glow-strong {
-    @apply text-muted-foreground rounded-lg transition-all duration-200;
-  }
-  .btn-icon-glow-strong:hover,
-  .btn-icon-glow-strong:focus-visible {
-    color: white !important;
-    background-color: #1A1A22 !important;
-    box-shadow: 0 0 15px 5px rgba(43,177,232,0.45),
-                0 0 25px 10px rgba(166,63,142,0.4);
-    transform: scale(1.12);
-  }
+/* ===================== */
+/* TOKENS – MODO ESCURO  */
+/* ===================== */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
 
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+/* O mapeamento de variáveis para Tailwind está no tailwind.config.ts (extend.colors etc). */
+
+/* ===== Base ===== */
+@layer base {
+  /* Removido outline-ring/50 (não existe em Tailwind v3) */
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
+}
+
+/* ===== Utilities extras (FORA do @theme) ===== */
+@layer utilities {
+  /* Ícones com gradiente da marca + glow no hover/focus */
+  .icon-gradient {
+    background: linear-gradient(90deg, #2BB1E8 0%, #4D58F0 50%, #A63F8E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.3s ease;
+  }
+  .icon-glow:hover,
+  .icon-glow:focus-visible {
+    filter:
+      drop-shadow(0 0 10px rgba(77, 88, 240, 0.6))
+      drop-shadow(0 0 20px rgba(166, 63, 142, 0.4));
+    transform: scale(1.15);
+  }
+  /* (correção) remover bloco aninhado duplicado */
+  /* Glow azul->roxo reutilizável (para inputs, cards, imagens, botões) */
   .glow-brand {
     transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
   }
@@ -83,6 +142,20 @@
       drop-shadow(0 0 18px rgba(166,63,142,.35));
   }
 
+  /* Borda/anel sutil – ótimo para Input e Cards */
+  .ring-brand {
+    box-shadow: 0 0 0 1px hsl(var(--border));
+  }
+  .ring-brand:hover,
+  .ring-brand:focus,
+  .ring-brand:focus-within {
+    box-shadow:
+      0 0 0 1px rgba(77,88,240,.45),
+      0 0 0 4px rgba(77,88,240,.15),
+      0 0 18px rgba(166,63,142,.25);
+  }
+
+  /* Glow “soft” atrás do card/imagem (via pseudo-elemento) */
   .card-glow {
     position: relative;
     isolation: isolate;
@@ -94,13 +167,23 @@
     inset: -10%;
     z-index: -1;
     border-radius: 24px;
-    background: radial-gradient(70% 70% at 50% 40%, rgba(77,88,240,.35), rgba(166,63,142,.25) 60%, transparent 70%);
+    background: radial-gradient(60% 60% at 50% 40%,
+      rgba(77,88,240,.25), rgba(166,63,142,.18) 60%, transparent 70%);
     opacity: 0;
-    filter: blur(22px);
+    filter: blur(18px);
     transition: opacity .25s ease;
   }
   .card-glow:hover::after,
   .card-glow:focus-within::after {
     opacity: 1;
+  }
+
+  /* Borda gradiente sutil (opcional para botões/contêineres) */
+  .border-gradient {
+    position: relative;
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--background), var(--background)) padding-box,
+      linear-gradient(90deg,#2BB1E8,#4D58F0,#A63F8E) border-box;
   }
 }
