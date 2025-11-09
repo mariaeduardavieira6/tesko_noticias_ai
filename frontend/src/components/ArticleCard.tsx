@@ -1,108 +1,142 @@
-// components/ArticleCard.tsx
-import type { NewsArticle } from "@/types/news";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { Share2, Linkedin, ExternalLink } from "lucide-react";
-import { Button } from "./ui/button";
-import SafeImage from "@/components/SafeImage";
+// src/components/ArticleCard.tsx
+import Link from "next/link"
+import { Share2, Linkedin, ExternalLink } from "lucide-react"
+import type { NewsArticle } from "@/types/news"
 
-function formatDate(dateString: string) {
-  return new Date(dateString).toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-}
+type Props = { article: NewsArticle }
 
-export function ArticleCard({ article }: { article: NewsArticle }) {
-  const categoryName = article.categories?.[0]?.name ?? "Notícia";
-  const displayDate = formatDate(article.published_at);
+export function ArticleCard({ article }: Props) {
+  const categoryName = article.categories?.[0]?.name ?? "Notícia"
+  const imgSrc =
+    article.image_url || article.image || "https://placehold.co/800x450/jpg"
 
-  const handleIconClick = (e: React.MouseEvent, url: string) => {
-    e.stopPropagation();
-    e.preventDefault();
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
+  const displayDate = new Date(article.published_at).toLocaleDateString(
+    "pt-BR",
+    { day: "2-digit", month: "2-digit", year: "numeric" }
+  )
+
+  const openExternal = (
+    e: React.MouseEvent,
+    url: string | null | undefined
+  ) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (url) window.open(url, "_blank", "noopener,noreferrer")
+  }
 
   return (
     <Link
-      href={`/noticia/${article.id}`}
-      className={cn(
-        "group",
-        "flex flex-col",
-        "bg-card border border-border rounded-2xl overflow-hidden",
-        "transition-all duration-300 ease-out",
-        "ring-brand card-glow glow-brand"
-      )}
+      href={`/articles/${article.id}`}
+      className={`
+        group relative flex h-full flex-col overflow-hidden
+        rounded-[20px] border border-border bg-card/90
+        transition-all duration-300 ease-out
+        on-card-hover-ring
+      `}
     >
-      {/* Imagem e Categoria */}
-      <div className="relative w-full aspect-video overflow-hidden">
-        <SafeImage
-          src={article.image_url || article.image || "https://placehold.co/800x450/jpg"}
+      {/* Imagem (vertical, altura reduzida) */}
+      <div className="relative w-full aspect-[4/5] overflow-hidden">
+        <img
+          src={imgSrc}
           alt={article.title}
-          w={800}
-          h={450}
-          className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover:scale-105"
+          className="img-fill object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
-        <Badge
-          className={cn(
-            "absolute top-3 left-3 border-none text-xs font-bold shadow-lg",
-            "bg-muted text-muted-foreground",
-            "transition-colors duration-300",
-            "tag-gradient-on-hover"
-          )}
+        {/* fade para legibilidade */}
+        <div className="card-image-fade" />
+
+        {/* Badge da categoria (reage ao hover do CARD) */}
+        <span
+          className={`
+            absolute left-4 top-3 z-10 rounded-full px-3 py-1 text-[11px] font-bold
+            bg-muted text-muted-foreground shadow
+            transition-all duration-300
+            group-hover:text-white
+            group-hover:bg-gradient-to-r group-hover:from-[#2BB1E8] group-hover:via-[#4D58F0] group-hover:to-[#A63F8E]
+            group-hover:shadow-[0_0_0_1px_rgba(77,88,240,.28),0_0_14px_rgba(77,88,240,.35)]
+          `}
         >
           {categoryName}
-        </Badge>
+        </span>
       </div>
 
       {/* Conteúdo */}
-      <div className="flex flex-col flex-1 p-6">
+      <div className="relative flex flex-1 flex-col p-6">
+        {/* Aurora/halo no hover (mantido) */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10 rounded-[inherit] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        >
+          <div className="absolute inset-0 card-glow" />
+        </div>
+
+        {/* meta (fonte • data) */}
         <div className="mb-2 text-xs font-medium text-muted-foreground">
           <span>{article.source}</span>
           <span className="mx-1.5">•</span>
           <span>{displayDate}</span>
         </div>
 
-        <h3 className="text-base font-semibold text-foreground line-clamp-2 mb-2 transition-colors text-gradient-on-hover">
+        {/* Título — gradiente APENAS NO HOVER DO CARD (prioridade) */}
+        <h3
+          className={`
+            text-lg md:text-xl font-semibold leading-snug text-foreground
+            transition-colors
+            group-hover:text-transparent group-hover:bg-clip-text
+            group-hover:bg-gradient-to-r group-hover:from-cyan-300 group-hover:via-indigo-300 group-hover:to-fuchsia-300
+          `}
+        >
           {article.title}
         </h3>
 
-        <p className="text-sm text-muted-foreground line-clamp-3 flex-1 desc-purple-on-hover">
+        {/* resumo */}
+        <p className="mt-2 text-sm text-muted-foreground desc-purple-on-hover">
           {article.summary}
         </p>
 
-        <div className="flex items-center gap-2 pt-5 mt-auto border-t border-border/50 text-muted-foreground">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
+        {/* separador */}
+        <div className="mt-5 h-px w-full bg-border/60" />
+
+        {/* Ações (brilham quando passa o mouse em QUALQUER parte do card) */}
+        <div className="mt-3 flex items-center gap-2 text-muted-foreground">
+          <button
             aria-label="Compartilhar"
-            onClick={(e) => handleIconClick(e, `https://twitter.com/intent/tweet?url=${article.url}&text=${article.title}`)}
+            className="on-card-hover-glow h-8 w-8 rounded-full transition"
+            onClick={(e) =>
+              openExternal(
+                e,
+                `https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                  article.url ?? ""
+                )}&text=${encodeURIComponent(article.title)}`
+              )
+            }
           >
-            <Share2 className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full"
+            <Share2 className="mx-auto h-4 w-4" />
+          </button>
+
+          <button
             aria-label="LinkedIn"
-            onClick={(e) => handleIconClick(e, `https://www.linkedin.com/shareArticle?mini=true&url=${article.url}`)}
+            className="on-card-hover-glow h-8 w-8 rounded-full transition"
+            onClick={(e) =>
+              openExternal(
+                e,
+                `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(
+                  article.url ?? ""
+                )}`
+              )
+            }
           >
-            <Linkedin className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 rounded-full ml-auto"
+            <Linkedin className="mx-auto h-4 w-4" />
+          </button>
+
+          <button
             aria-label="Fonte original"
-            onClick={(e) => handleIconClick(e, article.url)}
+            className="on-card-hover-glow ml-auto h-8 w-8 rounded-full transition"
+            onClick={(e) => openExternal(e, article.url)}
           >
-            <ExternalLink className="w-4 h-4" />
-          </Button>
+            <ExternalLink className="mx-auto h-4 w-4" />
+          </button>
         </div>
       </div>
     </Link>
-  );
+  )
 }

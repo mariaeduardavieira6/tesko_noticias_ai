@@ -1,19 +1,28 @@
 "use client"
+import Link from "next/link"
 
 export function Footer() {
-  return (
-    <footer className="w-full border-t border-border bg-background">
-      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 py-6
-                      flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="text-xs text-muted-foreground">
-          © 2025 Tesko AI. Todos os direitos reservados.
-        </p>
-        <nav className="flex gap-4 text-xs">
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Sobre</a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Contato</a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacidade</a>
-        </nav>
-      </div>
-    </footer>
-  )
+  return (
+    <footer className="border-t border-border bg-background">
+      {/* linha de degradê finíssima */}
+      <div className="h-px w-full bg-gradient-to-r from-[#2BB1E8] via-[#4D58F0] to-[#A63F8E] opacity-60" />
+
+      <div className="container mx-auto max-w-7xl px-4 md:px-6">
+        {/* <<< Altura fixa do rodapé >>> */}
+        <div className="flex h-9 items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Tesko AI. Todos os direitos reservados.
+          </span>
+
+          <nav className="flex items-center gap-3 text-sm text-muted-foreground">
+            <Link href="/politicas" className="hover:underline">Políticas</Link>
+            <span className="opacity-40">•</span>
+            <Link href="/sobre" className="hover:underline">Sobre</Link>
+            <span className="opacity-40">•</span>
+            <Link href="/contato" className="hover:underline">Contato</Link>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  )
 }

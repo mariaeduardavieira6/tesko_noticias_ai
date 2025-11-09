@@ -1,11 +1,16 @@
 // src/components/ArticleCardSkeleton.tsx
-
 export default function ArticleCardSkeleton() {
   return (
-    <div className="animate-pulse rounded-2xl border p-4">
-      <div className="h-40 w-full rounded-xl bg-gray-200 dark:bg-gray-700 mb-3" />
-      <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded mb-2" />
-      <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded" />
+    <div className="rounded-2xl border border-border bg-card/90 p-4">
+      <div className="skeleton-block h-40 w-full rounded-xl mb-4" />
+      <div className="skeleton-line h-4 w-3/4 rounded mb-2" />
+      <div className="skeleton-line h-4 w-1/2 rounded" />
+      <div className="mt-4 h-px w-full bg-border/60" />
+      <div className="mt-3 flex gap-2">
+        <div className="skeleton-circle h-8 w-8" />
+        <div className="skeleton-circle h-8 w-8" />
+        <div className="ml-auto skeleton-circle h-8 w-8" />
+      </div>
     </div>
-  );
+  )
 }

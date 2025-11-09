@@ -1,23 +1,46 @@
 "use client"
 
-import { useState, useEffect, type FormEvent } from "react"
+import { useState, useEffect, useRef, type FormEvent } from "react"
 import { useTheme } from "next-themes"
 import { Search, Building2, TrendingUp, Sun, Moon, Laptop, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import Link from "next/link"
 
 export function Header() {
   const { theme, setTheme, systemTheme } = useTheme()
   const [searchQuery, setSearchQuery] = useState("")
   const [mounted, setMounted] = useState(false)
-  const [showFab, setShowFab] = useState(false) // exibe a lupa flutuante ao rolar
-  const [showFabSearch, setShowFabSearch] = useState(false) // overlay da busca
+  const [showFab, setShowFab] = useState(false)
+  const [showFabSearch, setShowFabSearch] = useState(false)
+
+  // qual painel aberto: "companies" | "trending" | null
+  const [openPanel, setOpenPanel] = useState<null | "companies" | "trending">(null)
+
+  // refs e altura real do header p/ posicionar os painéis/mini-busca
+  const headerRef = useRef<HTMLDivElement | null>(null)
+  const [headerH, setHeaderH] = useState(0)
+
+  const companiesRef = useRef<HTMLDivElement | null>(null)
+  const trendingRef = useRef<HTMLDivElement | null>(null)
+  const companiesBtnRef = useRef<HTMLButtonElement | null>(null)
+  const trendingBtnRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => setMounted(true), [])
 
-  // controla exibição da FAB após rolar a página
+  useEffect(() => {
+    const measure = () => setHeaderH(headerRef.current?.offsetHeight ?? 0)
+    measure()
+    const ro = new ResizeObserver(measure)
+    if (headerRef.current) ro.observe(headerRef.current)
+    window.addEventListener("resize", measure)
+    return () => {
+      ro.disconnect()
+      window.removeEventListener("resize", measure)
+    }
+  }, [])
+
+  // FAB da busca ao rolar
   useEffect(() => {
     const onScroll = () => setShowFab((window.scrollY || 0) > 120)
     onScroll()
@@ -25,41 +48,90 @@ export function Header() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  const companies = [
-    "OpenAI",
-    "Google",
-    "Meta",
-    "Microsoft",
-    "Apple",
-    "Anthropic",
-    "xAI",
-    "Mistral",
-    "Cohere",
-    "Hugging Face",
-    "NVIDIA",
-  ]
+  // fechar ao clicar fora / Esc
+  useEffect(() => {
+    function handleDown(e: MouseEvent) {
+      const t = e.target as Node
+      const inCompanies =
+        companiesRef.current?.contains(t) || companiesBtnRef.current?.contains(t)
+      const inTrending =
+        trendingRef.current?.contains(t) || trendingBtnRef.current?.contains(t)
+      if (!inCompanies && !inTrending) setOpenPanel(null)
+    }
+    function handleEsc(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpenPanel(null)
+    }
+    document.addEventListener("mousedown", handleDown)
+    document.addEventListener("keydown", handleEsc)
+    return () => {
+      document.removeEventListener("mousedown", handleDown)
+      document.removeEventListener("keydown", handleEsc)
+    }
+  }, [])
 
+  // fechar ao rolar (scroll/wheel/touch)
+  useEffect(() => {
+    if (!openPanel) return
+    const close = () => setOpenPanel(null)
+    window.addEventListener("scroll", close, { passive: true })
+    window.addEventListener("wheel", close, { passive: true })
+    window.addEventListener("touchmove", close, { passive: true })
+    return () => {
+      window.removeEventListener("scroll", close)
+      window.removeEventListener("wheel", close)
+      window.removeEventListener("touchmove", close)
+    }
+  }, [openPanel])
+
+  const companies = [
+    "OpenAI","Google","Meta","Microsoft","Apple",
+    "Anthropic","xAI","Mistral","Cohere","Hugging Face","NVIDIA",
+  ]
   const trendingTopics = [
-    { name: "Reddit (r/artificial)", url: "https://www.reddit.com/r/ArtificialInteligence/" },
+    { name: "Reddit (r/artificial)", url: "https://www.reddit.com/r/artificial/" },
     { name: "X (#AI)", url: "https://twitter.com/search?q=%23AI&src=typed_query&f=live" },
     { name: "LinkedIn (IA)", url: "https://www.linkedin.com/feed/hashtag/inteligenciaartificial/" },
   ]
 
-  const effectiveTheme = theme === "system" ? systemTheme : theme
+  const effectiveTheme = (theme === "system" ? systemTheme : theme) ?? "light"
+  const isDark = effectiveTheme === "dark"
+
+  // === NOVO: tons dos painéis por tema ===
+  // LIGHT -> usa seus tokens: bg-popover (branco), texto escuro, borda sutil, sombra leve
+  // DARK  -> fundo petróleo escuro, texto claro, borda suave, sombra forte
+  const panelTone = isDark
+    ? "bg-[#0b0f14] text-white border-white/10 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
+    : "bg-popover text-popover-foreground border-border shadow-[0_10px_30px_rgba(2,6,23,0.10)]"
+
+  // Base do "pill" (item dos painéis)
+  const pillBase =
+    "transition-all duration-200 px-3 py-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D58F0]/30"
+
+  // Texto do item por tema
+  const pillText = isDark ? "text-white/85 hover:text-white" : "text-foreground hover:text-foreground"
+
+  // Fundo hover do item por tema (sutil no light, um pouco mais forte no dark)
+  const pillHoverBg = isDark ? "hover:bg-white/5" : "hover:bg-blue-500/10"
+
+  // Links do Trending por tema (azul coerente no light; no dark azul vivo)
+  const trendingLinkText = isDark
+    ? "text-[#78b2ff] hover:text-white"
+    : "text-blue-600 hover:text-blue-700"
 
   function onSubmit(e: FormEvent) {
     e.preventDefault()
     if (!searchQuery.trim()) return
-    console.log("Buscando por:", searchQuery)
-    // ex.: router.push(`/search?q=${encodeURIComponent(searchQuery)}`)
     setShowFabSearch(false)
   }
 
   return (
     <>
-      {/* HEADER (não fixo) */}
-      <header className="relative z-30 w-full border-b border-border bg-background">
-        <div className="container mx-auto max-w-7xl flex h-16 items-center justify-between gap-4 px-4 md:px-6">
+      {/* HEADER */}
+      <header className="relative z-30 w-full bg-background border-b border-border">
+        <div
+          ref={headerRef}
+          className="container mx-auto max-w-7xl flex h-[44px] items-center justify-between gap-4 px-4 md:px-6"
+        >
           {/* Logo */}
           <Link href="/" className="flex-shrink-0" aria-label="Tesko AI Início">
             <span className="text-2xl font-extrabold tracking-wide leading-none bg-gradient-to-r from-[#2BB1E8] via-[#4D58F0] to-[#A63F8E] bg-clip-text text-transparent">
@@ -67,7 +139,7 @@ export function Header() {
             </span>
           </Link>
 
-          {/* Busca central – md+ (expande ao foco) */}
+          {/* Busca central */}
           <form
             onSubmit={onSubmit}
             className="hidden md:flex relative items-center mx-auto transition-[max-width] duration-300 ease-out max-w-lg focus-within:max-w-2xl w-full"
@@ -82,92 +154,119 @@ export function Header() {
             />
           </form>
 
-          {/* Ações / Ícones */}
+          {/* Ícones */}
           <div className="flex items-center gap-1">
-            {/* Empresas */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:bg-accent transition icon-glow"
-                  aria-label="Empresas monitoradas"
-                >
-                  <Building2 className="w-5 h-5 icon-gradient" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-48 bg-popover border-border p-3">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-foreground px-2">Empresas Monitoradas</h3>
-                  <div className="flex flex-col">
-                    {companies.map((company) => (
-                      <Link
-                        key={company}
-                        href={`/?source=${company}`}
-                        className="text-sm text-muted-foreground hover:text-foreground cursor-pointer p-2 rounded-md hover:bg-accent transition-colors"
-                      >
-                        {company}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <Button
+              ref={companiesBtnRef}
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-muted-foreground hover:bg-accent transition icon-glow"
+              aria-label="Empresas monitoradas"
+              onClick={() => setOpenPanel(p => (p === "companies" ? null : "companies"))}
+            >
+              <Building2 className="w-6 h-6 icon-gradient" />
+            </Button>
 
-            {/* Trending */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-muted-foreground hover:bg-accent transition icon-glow"
-                  aria-label="Trending topics"
-                >
-                  <TrendingUp className="w-5 h-5 icon-gradient" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-56 bg-popover border-border p-3">
-                <div className="space-y-2">
-                  <h3 className="font-semibold text-sm text-foreground px-2">Trending Topics</h3>
-                </div>
-                <ul className="flex flex-col">
-                  {trendingTopics.map((topic) => (
-                    <li key={topic.name}>
-                      <a
-                        href={topic.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:underline block p-2 rounded-md hover:bg-accent transition-colors"
-                      >
-                        {topic.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </PopoverContent>
-            </Popover>
+            <Button
+              ref={trendingBtnRef}
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 text-muted-foreground hover:bg-accent transition icon-glow"
+              aria-label="Trending topics"
+              onClick={() => setOpenPanel(p => (p === "trending" ? null : "trending"))}
+            >
+              <TrendingUp className="w-6 h-6 icon-gradient" />
+            </Button>
 
-            {/* Tema */}
             <Button
               variant="ghost"
               size="icon"
-              className="text-muted-foreground hover:text-foreground hover:bg-accent"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-accent"
               aria-label="Alternar tema"
-              onClick={() => setTheme(effectiveTheme === "dark" ? "light" : "dark")}
+              onClick={() => setTheme(isDark ? "light" : "dark")}
             >
               {!mounted ? (
-                <Laptop className="w-5 h-5" />
-              ) : effectiveTheme === "dark" ? (
-                <Sun className="w-5 h-5" />
+                <Laptop className="w-6 h-6" />
+              ) : isDark ? (
+                <Sun className="w-6 h-6" />
               ) : (
-                <Moon className="w-5 h-5" />
+                <Moon className="w-6 h-6" />
               )}
             </Button>
           </div>
         </div>
+
+        {/* Linha degradê base */}
+        <div className="h-px w-full bg-gradient-to-r from-[#2BB1E8] via-[#4D58F0] to-[#A63F8E] opacity-60" />
       </header>
 
-      {/* Lupa flutuante (FAB) – aparece ao rolar */}
+      {/* Overlay para fechar ao clicar fora */}
+      {openPanel && (
+        <button
+          type="button"
+          aria-hidden="true"
+          onClick={() => setOpenPanel(null)}
+          className="fixed inset-0 z-[9998] bg-transparent cursor-default"
+        />
+      )}
+
+      {/* Painéis — AGORA adaptados por tema */}
+      {openPanel === "companies" && (
+        <div
+          ref={companiesRef}
+          className={`fixed right-4 z-[9999] w-56 rounded-xl border p-3 ${panelTone}`}
+          style={{ top: headerH + 8 }}
+          role="dialog"
+          aria-label="Empresas Monitoradas"
+        >
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm px-2">Empresas Monitoradas</h3>
+            <div className="flex flex-col gap-1">
+              {companies.map((company) => (
+                <Link
+                  key={company}
+                  href={`/?source=${company}`}
+                  className={`${pillBase} ${pillText} ${pillHoverBg} block`}
+                  onClick={() => setOpenPanel(null)}
+                >
+                  {company}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {openPanel === "trending" && (
+        <div
+          ref={trendingRef}
+          className={`fixed right-4 z-[9999] w-64 rounded-xl border p-3 ${panelTone}`}
+          style={{ top: headerH + 8 }}
+          role="dialog"
+          aria-label="Trending Topics"
+        >
+          <div className="space-y-3">
+            <h3 className="font-semibold text-sm px-2">Trending Topics</h3>
+            <ul className="flex flex-col gap-1">
+              {trendingTopics.map((topic) => (
+                <li key={topic.name}>
+                  <a
+                    href={topic.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`${pillBase} ${pillHoverBg} ${trendingLinkText} hover:underline block`}
+                    onClick={() => setOpenPanel(null)}
+                  >
+                    {topic.name}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* FAB e mini-busca (sem alterações de tema) */}
       {showFab && (
         <>
           <button
@@ -181,9 +280,11 @@ export function Header() {
             <Search className="h-5 w-5 text-foreground" />
           </button>
 
-          {/* Mini overlay de busca */}
           {showFabSearch && (
-            <div className="fixed top-16 right-4 z-40 w-[min(92vw,480px)] rounded-xl border border-input bg-background/95 p-2 shadow-lg backdrop-blur">
+            <div
+              className="fixed right-4 z-40 w-[min(92vw,480px)] rounded-xl border border-input bg-background/95 p-2 shadow-lg backdrop-blur"
+              style={{ top: headerH + 8 }}
+            >
               <form onSubmit={onSubmit} className="relative">
                 <Search className="absolute left-3.5 size-4 text-muted-foreground pointer-events-none" />
                 <Input

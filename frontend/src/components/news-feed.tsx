@@ -1,7 +1,6 @@
-// Em: components/news-feed.tsx
 "use client"
 
-import { NewsCard } from "@/components/card"
+import { ArticleCard } from "./ArticleCard" // import relativo evita ciclo
 import { newsData } from "@/data/news"
 
 interface NewsFeedProps {
@@ -10,44 +9,64 @@ interface NewsFeedProps {
   searchQuery?: string
 }
 
+type LocalNews = {
+  id: number | string
+  title: string
+  description: string
+  image?: string | null
+  imageUrl?: string | null
+  url?: string | null
+  date: string
+  category: string
+  source: string
+}
+
 export function NewsFeed({ category, sourceFilter, searchQuery }: NewsFeedProps) {
-  let filteredNews = newsData
+  let items = newsData as LocalNews[]
 
-  // Filtro Categoria
   if (category !== "Últimas notícias") {
-    filteredNews = filteredNews.filter((news) => news.category === category)
+    items = items.filter((n) => n.category === category)
   }
-
-  // Filtro Fonte
   if (sourceFilter) {
-    filteredNews = filteredNews.filter((news) => news.source === sourceFilter)
+    items = items.filter((n) => n.source === sourceFilter)
   }
-  
-  // Filtro por busca (título/descrição)
-  // searchQuery é opcional e pode vir do Header/HomeClient
-  // Se não vier, simplesmente ignoramos
   if (searchQuery && searchQuery.trim()) {
     const term = searchQuery.toLowerCase()
-    filteredNews = filteredNews.filter(
-      (n) => n.title.toLowerCase().includes(term) || n.description.toLowerCase().includes(term)
+    items = items.filter(
+      (n) =>
+        n.title.toLowerCase().includes(term) ||
+        (n.description || "").toLowerCase().includes(term)
     )
   }
 
   return (
-    // <-- MUDANÇA: Voltamos para no máximo 4 colunas em telas XL.
-    // Isso vai deixar os cards MAIS LARGOS.
-    <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6"> 
-      
-      {filteredNews.length > 0 ? (
-        filteredNews.map((news) => (
-          <NewsCard key={news.id} news={news} />
-        ))
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
+      {items.length ? (
+        items.map((n) => {
+          const article = {
+            id: typeof n.id === "string" ? n.id : Number(n.id),
+            title: n.title,
+            summary: n.description,
+            url: n.url ?? "#",
+            image: n.image ?? n.imageUrl ?? null,
+            image_url: null,
+            published_at: n.date,
+            categories: [{ id: 1, name: n.category }],
+            companies: undefined,
+            source: n.source,
+          } as const
+
+          return (
+            <div key={String(n.id)} className="h-full">
+              <ArticleCard article={article as any} />
+            </div>
+          )
+        })
       ) : (
-        <p className="text-gray-400">
+        <p className="col-span-full text-muted-foreground">
           Nenhuma notícia encontrada com os filtros aplicados.
         </p>
       )}
-
     </div>
   )
 }
