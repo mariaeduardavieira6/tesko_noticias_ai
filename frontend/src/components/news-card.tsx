@@ -3,7 +3,6 @@
 
 import Link from "next/link";
 
-/** Aceita payloads diferentes (mock ou API) */
 type NewsLike = {
   id: number | string;
   title: string;
@@ -27,13 +26,10 @@ type NewsLike = {
 
 type Props = {
   news: NewsLike;
-  /** se sua rota for /noticia/[id], passe hrefBase="/noticia" */
-  hrefBase?: string;
+  hrefBase?: string; // ex.: "/noticia"
 };
 
-function pickImage(n: NewsLike) {
-  return n.image ?? n.image_url ?? "";
-}
+function pickImage(n: NewsLike) { return n.image ?? n.image_url ?? ""; }
 function pickDate(n: NewsLike) {
   const raw = n.published_at ?? n.publishedAt ?? n.date ?? "";
   if (!raw) return "";
@@ -41,57 +37,48 @@ function pickDate(n: NewsLike) {
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
-function pickCategory(n: NewsLike) {
-  if (n.category) return n.category;
-  return n.categories?.[0]?.name ?? "";
-}
-function pickSource(n: NewsLike) {
-  if (n.source) return n.source;
-  return n.companies?.[0]?.name ?? "";
-}
-function pickDescription(n: NewsLike) {
-  return n.description ?? n.summary ?? "";
-}
+function pickCategory(n: NewsLike) { return n.category ?? n.categories?.[0]?.name ?? ""; }
+function pickSource(n: NewsLike)   { return n.source ?? n.companies?.[0]?.name ?? ""; }
+function pickDescription(n: NewsLike){ return n.description ?? n.summary ?? ""; }
 
-export function NewsCard({ news, hrefBase = "/articles" }: Props) {
+export function NewsCard({ news, hrefBase = "/noticia" }: Props) {
+  const href = `${hrefBase}/${news.id}`;
   const img = pickImage(news);
   const date = pickDate(news);
   const category = pickCategory(news);
   const source = pickSource(news);
   const desc = pickDescription(news);
-  const href = `${hrefBase}/${news.id}`;
 
   return (
     <Link
       href={href}
       aria-label={news.title}
       className="
-        group glow-card               /* glow atrás + anel no hover (css utilitário) */
-        block overflow-hidden rounded-2xl border border-border bg-card
-        shadow-sm transition-all duration-300 hover:shadow-lg
+        group titlefx block overflow-hidden rounded-2xl
+        fx-neon hoverable shadow-sm transition-all duration-300
+        border border-border bg-card
       "
     >
       {/* Imagem */}
       <div className="relative aspect-video w-full overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={img || "/placeholder.png"}
+          src={img || 'https://placehold.co/800x480'}
           alt={news.title}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
         />
-        {/* fade inferior p/ legibilidade do título sobre a imagem */}
+        {/* fade neutro para legibilidade (sem tapete roxo) */}
         <span className="card-image-fade" />
 
-        {/* badge de categoria (reage ao hover) */}
         {category ? (
-          <span className="absolute left-3 top-3 rounded-md bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground on-card-hover-badge">
+          <span className="absolute left-3 top-3 rounded-md bg-muted px-2 py-1 text-xs font-semibold text-muted-foreground">
             {category}
           </span>
         ) : null}
       </div>
 
-      {/* Conteúdo */}
-      <div className="flex flex-col gap-2 p-4">
+      {/* Conteúdo liso (sem gradient de fundo) */}
+      <div className="card-body flex flex-col gap-2 p-4 bg-card" style={{ backgroundImage: "none" }}>
         {(source || date) && (
           <div className="text-xs text-muted-foreground">
             {source && <span>{source}</span>}
@@ -100,17 +87,7 @@ export function NewsCard({ news, hrefBase = "/articles" }: Props) {
           </div>
         )}
 
-        {/* Título:
-            - LIGHT: mantém cor legível SEM gradiente
-            - DARK : no hover vira gradiente (apenas no dark) */}
-        <h3
-          className="
-            line-clamp-2 text-base font-semibold transition-colors
-            text-foreground
-            dark:group-hover:text-transparent dark:group-hover:bg-clip-text
-            dark:group-hover:bg-[linear-gradient(90deg,#2BB1E8_0%,#7C8CFF_46%,#A63F8E_100%)]
-          "
-        >
+        <h3 className="on-card-hover-title line-clamp-2 text-base font-semibold">
           {news.title}
         </h3>
 

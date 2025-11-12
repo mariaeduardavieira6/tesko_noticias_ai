@@ -127,9 +127,7 @@
   }
 
   /* Glow leve reutilizável (para botões/inputs) */
-  .glow-brand {
-    transition: transform .25s ease, filter .25s ease, box-shadow .25s ease;
-  }
+  .glow-brand { transition: transform .25s ease, filter .25s ease, box-shadow .25s ease; }
   .glow-brand:hover,
   .glow-brand:focus,
   .glow-brand:focus-visible,
@@ -141,9 +139,7 @@
   }
 
   /* “Ring” sutil ao focar/hover */
-  .ring-brand {
-    box-shadow: 0 0 0 1px var(--border);
-  }
+  .ring-brand { box-shadow: 0 0 0 1px var(--border); }
   .ring-brand:hover,
   .ring-brand:focus,
   .ring-brand:focus-within {
@@ -153,12 +149,21 @@
       0 0 18px color-mix(in oklab, var(--ring-brand) 35%, transparent);
   }
 
-  /* Fundo de “card glow” opcional (pode ser aplicado em overlays) */
-  .card-glow {
-    background:
-      radial-gradient(55% 55% at 30% 10%, rgba(43,177,232,0.38) 0%, rgba(43,177,232,0) 60%),
-      radial-gradient(50% 60% at 85% 85%, rgba(166,63,142,0.30) 0%, rgba(166,63,142,0) 60%),
-      radial-gradient(55% 60% at 60% 50%, rgba(77,88,240,0.34) 0%, rgba(77,88,240,0) 65%);
+  /* Fundo “glow” padrão dos cards (HOME/Default) */
+  .glow-card { position: relative; border-radius: 1rem; background: var(--card); }
+  .glow-card > * { position: relative; z-index: 1; }
+  .glow-card::before{
+    content:""; position:absolute; inset:-10px; border-radius:inherit; pointer-events:none; z-index:0;
+    background: conic-gradient(from 0deg,#2BB1E8,#4D58F0,#A63F8E,#2BB1E8);
+    filter: blur(26px); opacity:.60; transition: opacity .18s ease, filter .18s ease, transform .18s ease;
+  }
+  .glow-card:hover::before{ opacity:.78; filter: blur(30px); }
+  .dark .glow-card::before{ opacity:.90; filter: blur(22px); }
+  .glow-card:hover{
+    box-shadow:
+      0 0 0 1px var(--ring-brand),
+      0 0 0 6px color-mix(in oklab, var(--ring-brand) 22%, transparent),
+      0 18px 38px color-mix(in oklab, var(--ring-brand) 22%, transparent);
   }
 
   /* Fade inferior na imagem para legibilidade do título */
@@ -169,43 +174,13 @@
     pointer-events: none;
     background: linear-gradient(
       180deg,
-      rgba(0,0,0,0.00) 0%,
+      rgba(0,0,0,0) 0%,
       rgba(0,0,0,0.32) 30%,
       rgba(0,0,0,0.80) 100%
     );
   }
 
-  /* ============ HOVER GLOBAL DO CARD (usa .group no wrapper) ============ */
-
-  /* Título normal; vira gradiente no hover do CARD */
-  .on-card-hover-title {
-    transition: color .25s ease, background .25s ease;
-    color: inherit;
-  }
-  .group:hover .on-card-hover-title,
-  .group:focus-within .on-card-hover-title {
-    color: transparent;
-    -webkit-background-clip: text;
-    background-clip: text;
-    background-image: linear-gradient(90deg, #2BB1E8 0%, #7C8CFF 46%, #A63F8E 100%);
-  }
-
-  /* Aurora por trás do conteúdo: oculta por padrão, aparece no hover do CARD */
-  .aurora-surface {
-    opacity: 0;
-    transition: opacity .25s ease;
-    background:
-      radial-gradient(65% 70% at 20% 0%, rgba(43,177,232,0.22) 0%, rgba(43,177,232,0.0) 60%),
-      radial-gradient(70% 80% at 90% 90%, rgba(166,63,142,0.18) 0%, rgba(166,63,142,0.0) 60%),
-      radial-gradient(55% 50% at 65% 45%, rgba(77,88,240,0.16) 0%, rgba(77,88,240,0.0) 65%);
-    filter: blur(0.0001px);
-  }
-  .group:hover .aurora-surface,
-  .group:focus-within .aurora-surface {
-    opacity: 0.95;
-  }
-
-  /* Ícones/elementos que devem brilhar quando o CARD é hover/focus-within */
+  /* Itens que brilham quando o card é hover/hover-within */
   .on-card-hover-glow {
     transition: transform .25s ease, filter .25s ease, opacity .25s ease;
     opacity: .92;
@@ -219,10 +194,8 @@
     opacity: 1;
   }
 
-  /* Halo/ring do próprio CARD no hover global */
-  .on-card-hover-ring {
-    transition: box-shadow .25s ease, transform .25s ease, filter .25s ease;
-  }
+  /* Halo/ring do CARD no hover global */
+  .on-card-hover-ring { transition: box-shadow .25s ease, transform .25s ease, filter .25s ease; }
   .group:hover.on-card-hover-ring,
   .group:focus-within.on-card-hover-ring {
     box-shadow:
@@ -234,9 +207,6 @@
       drop-shadow(0 0 10px rgba(77,88,240,.45))
       drop-shadow(0 0 18px rgba(166,63,142,.35));
   }
-
-  /* Zoom leve na imagem quando o CARD recebe hover */
-  .group:hover .img-zoom-on-hover { transform: scale(1.03); }
 
   /* ===================== Skeleton com shimmer ===================== */
   @keyframes skeleton-shimmer { 100% { transform: translateX(100%); } }
@@ -254,10 +224,7 @@
     animation: skeleton-shimmer 1.2s infinite;
   }
 
-  .skeleton-line {
-    @apply relative rounded;
-    background: color-mix(in oklab, var(--muted) 72%, black 0%);
-  }
+  .skeleton-line { @apply relative rounded; background: color-mix(in oklab, var(--muted) 72%, black 0%); }
   .dark .skeleton-line { background: color-mix(in oklab, var(--muted) 45%, white 0%); }
   .skeleton-line::after {
     content: "";
@@ -267,15 +234,9 @@
     animation: skeleton-shimmer 1.2s infinite;
   }
 
-  .skeleton-dot {
-    @apply h-1.5 w-1.5 rounded-full;
-    background: color-mix(in oklab, var(--muted-foreground) 70%, black 0%);
-  }
+  .skeleton-dot { @apply h-1.5 w-1.5 rounded-full; background: color-mix(in oklab, var(--muted-foreground) 70%, black 0%); }
 
-  .skeleton-circle {
-    @apply relative rounded-full;
-    background: color-mix(in oklab, var(--muted) 72%, black 0%);
-  }
+  .skeleton-circle { @apply relative rounded-full; background: color-mix(in oklab, var(--muted) 72%, black 0%); }
   .dark .skeleton-circle { background: color-mix(in oklab, var(--muted) 45%, white 0%); }
   .skeleton-circle::after {
     content: "";
@@ -284,23 +245,12 @@
     background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
     animation: skeleton-shimmer 1.2s infinite;
   }
-}
 
-/* Imagem sempre preenchendo o container 16:9 */
-.img-fill {
-  position: absolute !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-@layer utilities {
   /* Badge reage ao hover do CARD (wrapper .group) */
   .on-card-hover-badge {
     will-change: transform, filter, box-shadow, background;
     transition: transform .25s ease, filter .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease;
   }
-
   .group:hover .on-card-hover-badge,
   .group:focus-within .on-card-hover-badge {
     color: #fff !important;
@@ -314,72 +264,10 @@
       drop-shadow(0 0 14px rgba(166,63,142,.35));
     transform: translateZ(0) scale(1.04);
   }
-}
-@layer utilities {
-  /* ==== Hover visível no LIGHT sem "lavar" o conteúdo ==== */
-  .glow-card { position: relative; border-radius: 1rem; background: var(--card); }
-  .glow-card > * { position: relative; z-index: 1; } /* conteúdo sempre acima */
 
-  .glow-card::before {
-    content: "";
-    position: absolute;
-    inset: -8px;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 0;                /* atrás do conteúdo */
-    background: conic-gradient(from 0deg, #2BB1E8, #4D58F0, #A63F8E, #2BB1E8);
-    filter: blur(24px);
-    opacity: .42;              /* LIGHT: mais sutil para não “lavar” */
-    transition: opacity .18s ease, filter .18s ease, transform .18s ease;
-  }
-  .glow-card:hover::before { opacity: .60; filter: blur(28px); }
-
-  /* DARK: mantém presença forte, mas sempre por trás do conteúdo */
-  .dark .glow-card::before { opacity: .88; filter: blur(20px); }
-
-  /* Anel/realce no hover (usa seu token --ring-brand) */
-  .glow-card:hover {
-    box-shadow:
-      0 0 0 1px var(--ring-brand),
-      0 0 0 6px color-mix(in oklab, var(--ring-brand) 22%, transparent),
-      0 14px 34px color-mix(in oklab, var(--ring-brand) 18%, transparent);
-  }
-
-  /* Se por acaso o card tiver .glow-hover em algum lugar, neutraliza */
-  .glow-card.glow-hover::after { content: none !important; }
-}
-@layer utilities {
-  /* 1) Hover forte VISÍVEL no LIGHT, sem lavar o conteúdo */
-  .glow-card { position: relative; border-radius: 1rem; background: var(--card); }
-  .glow-card > * { position: relative; z-index: 1; } /* conteúdo sempre acima */
-
-  .glow-card::before {
-    content: "";
-    position: absolute;
-    inset: -10px;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 0; /* atrás do conteúdo */
-    background: conic-gradient(from 0deg, #2BB1E8, #4D58F0, #A63F8E, #2BB1E8);
-    filter: blur(26px);
-    opacity: .60;                    /* LIGHT: MAIS visível */
-    transition: opacity .18s ease, filter .18s ease, transform .18s ease;
-  }
-  .glow-card:hover::before { opacity: .78; filter: blur(30px); }
-
-  /* DARK mantém presença forte (mas sempre atrás do conteúdo) */
-  .dark .glow-card::before { opacity: .90; filter: blur(22px); }
-
-  /* Anel de destaque no hover (usa seu token --ring-brand) */
-  .glow-card:hover {
-    box-shadow:
-      0 0 0 1px var(--ring-brand),
-      0 0 0 6px color-mix(in oklab, var(--ring-brand) 22%, transparent),
-      0 18px 38px color-mix(in oklab, var(--ring-brand) 22%, transparent);
-  }
-
-  /* 2) Gradiente NO TÍTULO só no tema escuro (no light fica cor normal) */
-  /* regra original existia sem .dark, por isso lavava o texto no light */
+  /* =====================  HOVER DO TÍTULO  ===================== */
+  .on-card-hover-title { transition: color .25s ease, background .25s ease; color: inherit; }
+  /* Gradiente do título APENAS no tema escuro */
   .dark .group:hover .on-card-hover-title,
   .dark .group:focus-within .on-card-hover-title {
     color: transparent !important;
@@ -387,39 +275,7 @@
     background-clip: text;
     background-image: linear-gradient(90deg, #2BB1E8 0%, #7C8CFF 46%, #A63F8E 100%);
   }
-  /* no LIGHT o título mantém a cor legível */
-  .group:hover .on-card-hover-title,
-  .group:focus-within .on-card-hover-title {
-    color: var(--foreground) !important;
-    background: none !important;
-    -webkit-text-fill-color: currentColor !important;
-  }
-
-  /* 3) Se você usar a "aurora" dentro do card, garanta que ela fique ATRÁS */
-  .aurora-surface {
-    position: absolute;
-    inset: 0;
-    z-index: 0;          /* sempre atrás */
-    pointer-events: none;
-    mix-blend-mode: normal;
-    opacity: 0;
-    transition: opacity .25s ease, filter .25s ease;
-  }
-  /* LIGHT: bem mais sutil */
-  .group:hover .aurora-surface,
-  .group:focus-within .aurora-surface { opacity: .28; filter: blur(18px); }
-  /* DARK: pode ser mais presente */
-  .dark .group:hover .aurora-surface,
-  .dark .group:focus-within .aurora-surface { opacity: .70; filter: blur(22px); }
-
-  /* 4) Garantia extra de legibilidade no LIGHT quando houver hover */
-  .group:hover h1, .group:hover h2, .group:hover h3,
-  .group:hover .meta, .group:hover .excerpt {
-    color: var(--foreground);
-  }
-}
-@layer utilities {
-  /* no tema CLARO o título nunca vira gradiente */
+  /* Segurança: no LIGHT mantém cor normal */
   html:not(.dark) .group:hover h1,
   html:not(.dark) .group:hover h2,
   html:not(.dark) .group:hover h3 {
@@ -427,4 +283,141 @@
     background: none !important;
     -webkit-text-fill-color: currentColor !important;
   }
+
+  /* =====================  VARIANTE: SEÇÃO "MAIS NOTÍCIAS"  ===================== */
+  /* Envolva a grade com <section class="section-secondary"> ... */
+  /* Mata COMPLETAMENTE o glow/aurora roxo nessa seção */
+  .section-secondary .glow-card::before { content: none !important; }
+
+  .section-secondary .card-body {
+    background: var(--card) !important;
+    backdrop-filter: none !important;
+  }
+  .section-secondary .on-card-hover-title,
+  .section-secondary .group:hover .on-card-hover-title,
+  .section-secondary .group:focus-within .on-card-hover-title{
+    color: var(--foreground) !important;
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+  .section-secondary .on-card-hover-badge{
+    background: var(--muted) !important;
+    color: var(--muted-foreground) !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+  .section-secondary .card-image-fade{
+    height: 42% !important;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.22) 40%, rgba(0,0,0,.58) 100%) !important;
+  }
+
+  /* =====================  VARIANTE: NC-PLAIN (por card)  ===================== */
+  /* NC-PLAIN: mata QUALQUER gradiente/aurora no card onde aplicada */
+  .nc-plain.glow-card::before { content: none !important; }           /* sem glow externo */
+  .nc-plain .card-body {
+    background-color: var(--card) !important;                         /* fundo liso */
+    background-image: none !important;
+    backdrop-filter: none !important;
+  }
+  .nc-plain .card-body::before,
+  .nc-plain .card-body::after { content: none !important; }           /* previne pseudo-els */
+
+  /* badge neutra */
+  .nc-plain .on-card-hover-badge {
+    background: var(--muted) !important;
+    color: var(--muted-foreground) !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  /* tira “anel”/glow extra no hover */
+  .nc-plain.group:hover.on-card-hover-ring,
+  .nc-plain.group:focus-within.on-card-hover-ring {
+    box-shadow: 0 0 0 1px var(--border) !important;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  /* fade da imagem mais curto para não contaminar o texto */
+  .nc-plain .card-image-fade {
+    height: 36% !important;
+    background: linear-gradient(180deg,
+      rgba(0,0,0,0) 0%,
+      rgba(0,0,0,.18) 40%,
+      rgba(0,0,0,.50) 100%) !important;
+  }
 }
+
+/* Imagem sempre preenchendo o container 16:9 */
+.img-fill {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+@layer utilities {
+  /* === Moldura neon responsiva (apenas no hover/focus-visible) === */
+  .fx-neon {
+    position: relative;
+    border-radius: 1rem;                     /* combine com rounded-2xl */
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg,#2BB1E8 0%,#7C8CFF 50%,#A63F8E 100%) border-box; /* borda gradiente */
+    transition: transform .25s ease, box-shadow .25s ease;
+    /* variáveis responsivas */
+    --fx-blur: 10px;
+    --fx-opacity: .60;
+    --fx-scale: 1;
+  }
+
+  .fx-neon::before{
+    content:"";
+    position:absolute; inset:-12px; border-radius:inherit; z-index:-1;
+    background:
+      radial-gradient(40% 60% at 20% 0%, rgba(43,177,232,.35), transparent 60%),
+      radial-gradient(55% 60% at 100% 100%, rgba(166,63,142,.28), transparent 60%),
+      radial-gradient(50% 50% at 50% 50%, rgba(124,140,255,.25), transparent 60%);
+    filter: blur(var(--fx-blur));
+    opacity: var(--fx-opacity);
+    transform: scale(var(--fx-scale));
+    transition: filter .25s ease, opacity .25s ease, transform .25s ease;
+    pointer-events: none;
+  }
+
+  /* ativa o efeito só quando tem mouse/foco */
+  .fx-neon.hoverable:hover,
+  .fx-neon.hoverable:focus-visible {
+    transform: translateZ(0) scale(1.01);
+    box-shadow:
+      0 0 0 1px rgba(124,140,255,.28),
+      0 18px 40px -12px rgba(124,140,255,.18);
+  }
+  .fx-neon.hoverable:hover::before,
+  .fx-neon.hoverable:focus-visible::before {
+    --fx-blur: 18px;
+    --fx-opacity: .95;
+    --fx-scale: 1.02;
+  }
+
+  /* Responsividade: intensifica em telas maiores */
+  @media (min-width: 640px) {                 /* sm */
+    .fx-neon { --fx-blur: 12px; --fx-opacity: .70; }
+    .fx-neon.hoverable:hover::before,
+    .fx-neon.hoverable:focus-visible::before { --fx-blur: 22px; }
+  }
+  @media (min-width: 1024px) {                /* lg */
+    .fx-neon { --fx-blur: 14px; --fx-opacity: .75; }
+    .fx-neon.hoverable:hover::before,
+    .fx-neon.hoverable:focus-visible::before { --fx-blur: 28px; --fx-scale: 1.03; }
+  }
+
+  /* Acessibilidade: menos animação quando preferido */
+  @media (prefers-reduced-motion: reduce) {
+    .fx-neon, .fx-neon::before { transition: none; }
+  }
+}
+
