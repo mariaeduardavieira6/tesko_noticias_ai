@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, type FormEvent } from "react"
 import { useTheme } from "next-themes"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Search, Building2, TrendingUp, Sun, Moon, Laptop, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,15 +10,16 @@ import Link from "next/link"
 
 export function Header() {
   const { theme, setTheme, systemTheme } = useTheme()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
   const [searchQuery, setSearchQuery] = useState("")
   const [mounted, setMounted] = useState(false)
   const [showFab, setShowFab] = useState(false)
   const [showFabSearch, setShowFabSearch] = useState(false)
 
-  // qual painel aberto: "companies" | "trending" | null
   const [openPanel, setOpenPanel] = useState<null | "companies" | "trending">(null)
 
-  // refs e altura real do header p/ posicionar os painéis/mini-busca
   const headerRef = useRef<HTMLDivElement | null>(null)
   const [headerH, setHeaderH] = useState(0)
 
@@ -27,6 +29,15 @@ export function Header() {
   const trendingBtnRef = useRef<HTMLButtonElement | null>(null)
 
   useEffect(() => setMounted(true), [])
+
+  // Sincroniza o input com a URL
+  useEffect(() => {
+    // 📍 CORRIGIDO: Lendo o parâmetro 'q' (em vez de 'search')
+    const currentSearch = searchParams.get("q")
+    if (currentSearch) {
+      setSearchQuery(currentSearch)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const measure = () => setHeaderH(headerRef.current?.offsetHeight ?? 0)
@@ -96,31 +107,35 @@ export function Header() {
   const effectiveTheme = (theme === "system" ? systemTheme : theme) ?? "light"
   const isDark = effectiveTheme === "dark"
 
-  // === NOVO: tons dos painéis por tema ===
-  // LIGHT -> usa seus tokens: bg-popover (branco), texto escuro, borda sutil, sombra leve
-  // DARK  -> fundo petróleo escuro, texto claro, borda suave, sombra forte
   const panelTone = isDark
     ? "bg-[#0b0f14] text-white border-white/10 shadow-[0_12px_28px_rgba(0,0,0,0.45)]"
     : "bg-popover text-popover-foreground border-border shadow-[0_10px_30px_rgba(2,6,23,0.10)]"
 
-  // Base do "pill" (item dos painéis)
   const pillBase =
     "transition-all duration-200 px-3 py-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4D58F0]/30"
 
-  // Texto do item por tema
   const pillText = isDark ? "text-white/85 hover:text-white" : "text-foreground hover:text-foreground"
-
-  // Fundo hover do item por tema (sutil no light, um pouco mais forte no dark)
   const pillHoverBg = isDark ? "hover:bg-white/5" : "hover:bg-blue-500/10"
 
-  // Links do Trending por tema (azul coerente no light; no dark azul vivo)
   const trendingLinkText = isDark
     ? "text-[#78b2ff] hover:text-white"
     : "text-blue-600 hover:text-blue-700"
 
+  // 📍 FUNÇÃO DE SUBMIT CORRIGIDA
   function onSubmit(e: FormEvent) {
     e.preventDefault()
-    if (!searchQuery.trim()) return
+    
+    const params = new URLSearchParams(searchParams.toString())
+    
+    // 📍 CORRIGIDO: Usando 'q' para bater com o 'app/page.tsx'
+    if (searchQuery.trim()) {
+      params.set("q", searchQuery.trim())
+    } else {
+      params.delete("q")
+    }
+
+    router.push(`/?${params.toString()}`)
+    
     setShowFabSearch(false)
   }
 
@@ -210,7 +225,7 @@ export function Header() {
         />
       )}
 
-      {/* Painéis — AGORA adaptados por tema */}
+      {/* Painéis */}
       {openPanel === "companies" && (
         <div
           ref={companiesRef}
@@ -266,7 +281,7 @@ export function Header() {
         </div>
       )}
 
-      {/* FAB e mini-busca (sem alterações de tema) */}
+      {/* FAB e mini-busca */}
       {showFab && (
         <>
           <button
