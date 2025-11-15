@@ -8,24 +8,17 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 const tabs = ["Últimas notícias", "Lançamentos", "Pesquisas", "Ferramentas", "Políticas"]
 
-export default function Home({
-  searchParams,
-}: {
-  searchParams?: {
-    source?: string
-    q?: string
-    category?: string
-  }
-}) {
+// 📍 CORREÇÃO 1: Removidos 'searchParams' dos props.
+// A função 'Home' agora não recebe props.
+export default function Home() {
   const router = useRouter()
   const pathname = usePathname()
-  const params = useSearchParams()
+  const params = useSearchParams() // Este hook é a única fonte de dados da URL
 
-  // lê de props OU da URL em tempo de execução
-  const sourceFilter = searchParams?.source ?? params.get("source") ?? undefined
-  const searchQuery = searchParams?.q ?? params.get("q") ?? undefined
-  const initialCategory =
-    searchParams?.category ?? params.get("category") ?? "Últimas notícias"
+  // 📍 CORREÇÃO 2: Lendo os params *apenas* do hook 'params'.
+  const sourceFilter = params.get("source") ?? undefined
+  const searchQuery = params.get("q") ?? undefined
+  const initialCategory = params.get("category") ?? "Últimas notícias"
 
   const [activeTab, setActiveTab] = useState(initialCategory)
 
@@ -35,7 +28,7 @@ export default function Home({
   }, [initialCategory])
 
   const setCategoryInUrl = (next: string) => {
-    const sp = new URLSearchParams(params?.toString() ?? "")
+    const sp = new URLSearchParams(params.toString() ?? "") // Usando 'params' do hook
     if (next === "Últimas notícias") sp.delete("category")
     else sp.set("category", next)
     // preserva ?source e ?q
@@ -57,7 +50,8 @@ export default function Home({
           }}
           className="w-full"
         >
-          <TabsList className="h-auto justify-start bg-transparent p-0 border-b border-border rounded-none mb-2 md:mb-3">
+          {/* Você já tinha corrigido a responsividade das abas, ótimo! */}
+          <TabsList className="h-auto justify-start bg-transparent p-0 border-b border-border rounded-none mb-2 md:mb-3 overflow-x-auto whitespace-nowrap">
             {tabs.map((tab) => (
               <TabsTrigger
                 key={tab}

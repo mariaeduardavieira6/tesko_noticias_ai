@@ -9,12 +9,19 @@ export function Footer() {
 
       <div className="container mx-auto max-w-7xl px-4 md:px-6">
         {/* <<< Altura fixa do rodapé >>> */}
-        <div className="flex h-9 items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+        {/* 📍 CORRIGIDO:
+            - Removido 'h-9' e 'items-center'
+            - Adicionado 'flex-col md:flex-row', 'gap-3', 'py-4'
+            - 'items-center' adicionado para centralizar no celular
+        */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-3 py-4">
+          {/* 📍 CORRIGIDO: Adicionado 'text-center md:text-left' para alinhar no celular */}
+          <span className="text-sm text-muted-foreground text-center md:text-left">
             © {new Date().getFullYear()} Tesko AI. Todos os direitos reservados.
           </span>
 
-          <nav className="flex items-center gap-3 text-sm text-muted-foreground">
+          {/* 📍 CORRIGIDO: Adicionado 'justify-center' para o caso de quebra de linha */}
+          <nav className="flex items-center justify-center gap-3 text-sm text-muted-foreground">
             <Link href="/politicas" className="hover:underline">Políticas</Link>
             <span className="opacity-40">•</span>
             <Link href="/sobre" className="hover:underline">Sobre</Link>
